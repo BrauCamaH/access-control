@@ -8,10 +8,18 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { useForm } from "react-hook-form";
 
+import LoadingBackdrop from "./components/LoadingBackdrop";
+import Notification from "./components/Notification";
+
 import { db } from "./firebase";
 
 export default function FormDialog({ open, setOpen }) {
   const { register, handleSubmit } = useForm();
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [result, setResult] = useState("");
 
   const handleClose = () => {
     setOpen(false);
@@ -26,6 +34,7 @@ export default function FormDialog({ open, setOpen }) {
       return;
     }
 
+    setLoading(true);
     db.collection("users")
       .doc(rfidTag)
       .set({
@@ -37,18 +46,17 @@ export default function FormDialog({ open, setOpen }) {
       })
       .then((docRef) => {
         console.log("Document written");
+        setResult(`Usuario creado con id ${docRef.id}`);
+
+        setLoading(false);
+        setSuccess(true);
       })
       .catch((error) => {
         console.error("Error adding document: ", error);
+        setLoading(false);
+        setError(true);
       });
   };
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  useEffect(() => {
-    window.api.requestTagId();
-  }, []);
 
   useEffect(() => {
     window.api.getTagId((data) => setRfidTag(data));
@@ -56,9 +64,13 @@ export default function FormDialog({ open, setOpen }) {
 
   return (
     <div>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-        Open form dialog
-      </Button>
+      <LoadingBackdrop open={loading} />
+      <Notification
+        open={success}
+        setOpen={setSuccess}
+        type="success"
+        message={result}
+      />
       <Dialog
         open={open}
         onClose={handleClose}
@@ -68,7 +80,7 @@ export default function FormDialog({ open, setOpen }) {
           <DialogTitle id="form-dialog-title">Crear Usuario</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Para crear un usuario es neceario tener una tarjeta rfid.
+              Para crear un usuario es necesario tener una tarjeta rfid.
             </DialogContentText>
             <TextField
               value={rfidTag}
@@ -106,8 +118,8 @@ export default function FormDialog({ open, setOpen }) {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
+            <Button onClick={handleClose} color="secondary">
+              Cerrar
             </Button>
             <Button type="submit" color="primary">
               Crear Usuario

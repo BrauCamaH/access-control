@@ -82,9 +82,28 @@ ipcMain.on("quit-app", (args) => {
 });
 
 ipcMain.on("requestTag", async (event, args) => {
-  console.log("rfid detectado");
   parser.on("data", (data) => {
     console.log(data);
     event.sender.send("getTagId", data);
+  });
+});
+
+ipcMain.on("requestRfidStatus", async (event, args) => {
+  console.log("Rfid Status requested");
+
+  port.on("open", () => {
+    console.log("Rfid detectado");
+    event.sender.send("getRfidStatus", {
+      message: "Lector Detectado",
+      success: true,
+    });
+  });
+
+  port.on("error", () => {
+    console.log("Error en lector");
+    event.sender.send("getRfidStatus", {
+      message: "Error en lector",
+      success: false,
+    });
   });
 });

@@ -1,60 +1,105 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
-import {
-  Container,
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-} from "@material-ui/core";
+import { AppBar, Toolbar, Typography, Button, Chip } from "@material-ui/core";
 
 import CreateUserDialog from "./CreateUserDialog";
+import AccessDialog from "./components/AccessDialog";
+
+import "./App.css";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  menuButton: {
+  marginButton: {
     marginRight: theme.spacing(2),
   },
-  title: {
-    flexGrow: 1,
+  center: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "90vh",
+  },
+  appBar: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 }));
 
 export default function ButtonAppBar() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [isCheckout, setIsCheckout] = useState(false);
+  const [openAccessDialog, setOpenAccessDialog] = useState(false);
+
+  const [rfidStatus, setRfidStatus] = useState({
+    success: false,
+    message: "Error en lector",
+  });
+  useEffect(() => {
+    // window.api.requestTagId();
+    window.api.requestRfidStatus();
+    window.api.requestTagId();
+  }, []);
+
+  useEffect(() => {
+    window.api.getRfidStatus((data) => {
+      setRfidStatus(data);
+    });
+  }, [rfidStatus]);
 
   return (
-    <div className={classes.root}>
+    <div>
       <AppBar position="static">
-        <CreateUserDialog open={open} setOpen={setOpen} />
-
-        <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Villanapoli Control Acceso
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Ingresar Usuario
-          </Button>
+        <Toolbar className={classes.appBar}>
+          <Typography variant="h6">Villanapoli Control Acceso</Typography>
+          <div>
+            <Chip
+              label={rfidStatus.message}
+              color={rfidStatus.success ? "primary" : "secondary"}
+            />
+            <Button
+              color="inherit"
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
+              Ingresar Usuario
+            </Button>
+          </div>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="sm">
-        <Button variant="outlined" color="primary">
-          Ingresar
+      <div maxWidth="sm" className={classes.center}>
+        <Button
+          className={classes.marginButton}
+          variant="outlined"
+          color="primary"
+          onClick={() => {
+            setIsCheckout(false);
+            setOpenAccessDialog(true);
+          }}
+        >
+          Registrar Entrada
         </Button>
-        <Button variant="outlined" color="secondary">
-          Primary
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => {
+            setIsCheckout(true);
+            setOpenAccessDialog(true);
+          }}
+        >
+          Registrar Salida
         </Button>
-      </Container>
+      </div>
+      <CreateUserDialog open={open} setOpen={setOpen} />
 
+      <AccessDialog
+        open={openAccessDialog}
+        setOpen={setOpenAccessDialog}
+        isCheckout={isCheckout}
+      />
     </div>
   );
 }

@@ -5,8 +5,10 @@
   "main": "public/electron.js",
   "homepage": "./",
   "author": "Braulio Camarena <braulio.camarenah@gmail.com>",
+  "description": "Control de acceso Villa Napoli",
   "dependencies": {
     "@material-ui/core": "^4.11.4",
+    "@material-ui/lab": "^4.0.0-alpha.58",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -20,9 +22,9 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start-react": "react-scripts start",
+    "start-react": "BROWSER=none react-scripts start",
     "start-electron": "nodemon --watch ./public/* --exec \"electron .\"",
-    "dev": "concurrently \"yarn start-react\" \"wait-on https://localhost:3000 && yarn start-electron\"",
+    "dev": "concurrently \"yarn start-react\" \"wait-on http://localhost:3000 && yarn start-electron\"",
     "postinstall": "electron-builder install-app-deps",
     "build": "react-scripts build",
     "test": "react-scripts test",

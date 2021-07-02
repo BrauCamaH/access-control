@@ -10,6 +10,11 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on("test-receive", (event, data) => {
       callback(data);
     }),
+  requestRfidStatus: (args) => ipcRenderer.send("requestRfidStatus", args),
+  getRfidStatus: (callback) =>
+    ipcRenderer.on("getTagStatus", (event, data) => {
+      callback(data);
+    }),
   quitApp: (args) => ipcRenderer.send("quit-app", args),
   requestTagId: (args) => ipcRenderer.send("requestTag", args),
   getTagId: (callback) =>
