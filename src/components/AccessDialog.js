@@ -36,7 +36,6 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
   const [statusMessage, setStatusMessage] = useState("");
 
   const [rfidTag, setRfidTag] = useState("");
-  const didMountRef = useRef(false);
 
   function clearData() {
     setStaffData(null);
@@ -112,18 +111,18 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
 
   const handleClose = () => {
     setOpen(false);
+    window.api.removeEventListeners("getTagId");
   };
 
-  window.api.getTagId((data) => {
-    if (didMountRef.current) {
+  function handleEnter() {
+    clearData();
+    window.api.getTagId((data) => {
       audio.current.play();
       setRfidTag(data);
-    }
-  });
+    });
+  }
 
   useEffect(() => {
-    if (didMountRef.current) audio.current.play();
-    else didMountRef.current = true;
     if (!rfidTag) return;
 
     let userRef = db.collection("users").doc(rfidTag);
@@ -176,7 +175,7 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
       <Dialog
         open={open}
         onClose={handleClose}
-        onEnter={clearData}
+        onEnter={handleEnter}
         aria-labelledby="form-dialog-title"
       >
         <form onSubmit={handleAccess}>

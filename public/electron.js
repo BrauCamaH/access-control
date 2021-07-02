@@ -14,6 +14,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 600, // width of window
     height: 600, // height of window
+    devTools: !isDev,
     webPreferences: {
       // The preload file where we will perform our app communication
       preload: isDev
@@ -24,6 +25,7 @@ const createWindow = () => {
     },
   });
 
+  mainWindow.setMenu(null);
   // Loading a webpage inside the electron window we just created
   mainWindow.loadURL(
     isDev
@@ -88,22 +90,25 @@ ipcMain.on("requestTag", async (event, args) => {
   });
 });
 
+let rfidStatus;
+
+port.on("open", () => {
+  console.log("Rfid detectado");
+  rfidStatus = {
+    message: "Lector Detectado",
+    success: true,
+  };
+});
+
+port.on("error", () => {
+  console.log("Error en lector");
+  rfidStatus = {
+    message: "Error en lector",
+    success: false,
+  };
+});
+
 ipcMain.on("requestRfidStatus", async (event, args) => {
-  console.log("Rfid Status requested");
-
-  port.on("open", () => {
-    console.log("Rfid detectado");
-    event.sender.send("getRfidStatus", {
-      message: "Lector Detectado",
-      success: true,
-    });
-  });
-
-  port.on("error", () => {
-    console.log("Error en lector");
-    event.sender.send("getRfidStatus", {
-      message: "Error en lector",
-      success: false,
-    });
-  });
+  console.log("Rfid Status requested", rfidStatus);
+  event.sender.send("getRfidStatus", rfidStatus);
 });

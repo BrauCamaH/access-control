@@ -1,6 +1,9 @@
 const { ipcRenderer, contextBridge } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
+  removeEventListeners: (channel) => {
+    ipcRenderer.removeAllListeners(channel);
+  },
   // Invoke Methods
   testInvoke: (args) => ipcRenderer.invoke("test-invoke", args),
   // Send Methods
@@ -12,7 +15,7 @@ contextBridge.exposeInMainWorld("api", {
     }),
   requestRfidStatus: (args) => ipcRenderer.send("requestRfidStatus", args),
   getRfidStatus: (callback) =>
-    ipcRenderer.on("getTagStatus", (event, data) => {
+    ipcRenderer.on("getRfidStatus", (event, data) => {
       callback(data);
     }),
   quitApp: (args) => ipcRenderer.send("quit-app", args),

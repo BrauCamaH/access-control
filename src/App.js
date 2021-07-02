@@ -38,16 +38,14 @@ export default function ButtonAppBar() {
     message: "Error en lector",
   });
   useEffect(() => {
-    // window.api.requestTagId();
     window.api.requestRfidStatus();
     window.api.requestTagId();
-  }, []);
 
-  useEffect(() => {
     window.api.getRfidStatus((data) => {
       setRfidStatus(data);
+      console.log("rfid status", data);
     });
-  }, [rfidStatus]);
+  }, []);
 
   return (
     <div>

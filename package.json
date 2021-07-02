@@ -60,7 +60,7 @@
     "appId": "com.villanapoli.access-contro",
     "productName": "Vn Access Control",
     "files": [
-      "build/**/8"
+      "build/**/*"
     ],
     "directories": {
       "buildResources": "build"
