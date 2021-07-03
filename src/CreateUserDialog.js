@@ -99,10 +99,10 @@ export default function FormDialog({ open, setOpen }) {
         aria-labelledby="form-dialog-title"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle id="form-dialog-title">Crear Usuario</DialogTitle>
+          <DialogTitle id="form-dialog-title">Ingresar Empleado</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Para crear un usuario es necesario tener una tarjeta rfid.
+              Para crear un empledo es necesario tener una tarjeta rfid.
             </DialogContentText>
             <TextField
               value={rfidTag}
@@ -128,9 +128,8 @@ export default function FormDialog({ open, setOpen }) {
             <TextField
               fullWidth
               label="Segundo Apellido"
-              error={errors.secondLastName}
-              {...register("secondLastName", { required: true })}
-              required
+              error={errors.seconLastName}
+              {...register("seconLastName")}
             />
             <TextField
               fullWidth
@@ -164,7 +163,7 @@ export default function FormDialog({ open, setOpen }) {
               Cerrar
             </Button>
             <Button type="submit" color="primary">
-              Crear Usuario
+              Crear Empleado
             </Button>
           </DialogActions>
         </form>

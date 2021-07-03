@@ -14,7 +14,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     width: 600, // width of window
     height: 600, // height of window
-    devTools: !isDev,
+    devTools: isDev,
     webPreferences: {
       // The preload file where we will perform our app communication
       preload: isDev
@@ -25,7 +25,7 @@ const createWindow = () => {
     },
   });
 
-  mainWindow.setMenu(null);
+  !isDev && mainWindow.setMenu(null);
   // Loading a webpage inside the electron window we just created
   mainWindow.loadURL(
     isDev
