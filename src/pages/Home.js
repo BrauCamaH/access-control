@@ -7,7 +7,7 @@ import { useUserState } from "../providers/UserProvider";
 
 import CreateUserDialog from "../CreateUserDialog";
 import AccessDialog from "../components/AccessDialog";
-import {auth} from "../firebase";
+import { auth } from "../firebase";
 
 const useStyles = makeStyles((theme) => ({
   marginButton: {
@@ -55,6 +55,11 @@ export default function Home() {
       setRfidStatus(data);
       console.log("rfid status", data);
     });
+
+    return () => {
+      window.api.removeEventListeners("requestRfidStatus");
+      window.api.removeEventListeners("requestTag");
+    };
   }, []);
 
   return (
@@ -83,7 +88,6 @@ export default function Home() {
                     auth.signOut().then();
                   }}
                 >
-                  
                   Cerrar Sesion
                 </Button>
               </>

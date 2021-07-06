@@ -12,9 +12,8 @@ let mainWindow;
 // Initializing the Electron Window
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 600, // width of window
+    width: 1200, // width of window
     height: 600, // height of window
-    devTools: isDev,
     webPreferences: {
       // The preload file where we will perform our app communication
       preload: isDev
@@ -34,7 +33,7 @@ const createWindow = () => {
   );
 
   // Setting Window Icon - Asset file needs to be in the public/images folder.
-  mainWindow.setIcon(path.join(__dirname, "images/appicon.ico"));
+  mainWindow.setIcon(path.join(__dirname, "logo192.png"));
 
   // In development mode, if the window has loaded, then load the dev tools.
   if (isDev) {

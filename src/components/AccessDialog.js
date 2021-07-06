@@ -40,6 +40,7 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
   function clearData() {
     setStaffData(null);
     setValidTag(false);
+    setRfidTag(null);
   }
 
   const handleAccess = (e) => {
@@ -118,17 +119,18 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
     clearData();
     window.api.getTagId((data) => {
       audio.current.play();
+      console.log("setting data...");
       setRfidTag(data);
     });
   }
 
   useEffect(() => {
     if (!rfidTag) return;
-
-    let userRef = db.collection("users").doc(rfidTag);
+    setValidTag(false);
     setLoading(true);
 
-    userRef
+    db.collection("users")
+      .doc(rfidTag)
       .get()
       .then((doc) => {
         setLoading(false);
@@ -155,6 +157,12 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
       });
   }, [rfidTag]);
 
+  useEffect(() => {
+    return () => {
+      window.api.removeEventListeners("getTagId");
+    };
+  }, []);
+
   return (
     <div>
       <LoadingBackdrop open={loading} />
@@ -164,14 +172,12 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
         message={statusMessage}
         type="success"
       />
-
       <Notification
         open={error}
         setOpen={setError}
         message={statusMessage}
         type="error"
       />
-
       <Dialog
         open={open}
         onClose={handleClose}

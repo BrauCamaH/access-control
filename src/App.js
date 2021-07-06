@@ -21,6 +21,8 @@ function App() {
           <Home />
         </Route>
         <Route path="/login" render={() => <Redirect to="/" />} exact={true} />
+        <Route render={() => <Redirect to="/" />} />
+
       </Switch>
     </Router>
   );

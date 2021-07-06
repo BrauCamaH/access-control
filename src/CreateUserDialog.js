@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -22,6 +22,7 @@ export default function FormDialog({ open, setOpen }) {
     register,
     handleSubmit,
     formState: { errors },
+    clearErrors,
   } = useForm();
 
   const [loading, setLoading] = useState(false);
@@ -67,6 +68,8 @@ export default function FormDialog({ open, setOpen }) {
 
   const handleClose = () => {
     setOpen(false);
+    setRfidTag("");
+    clearErrors();
     window.api.removeEventListeners("getTagId");
   };
 
@@ -76,6 +79,12 @@ export default function FormDialog({ open, setOpen }) {
       audio.current.play();
     });
   }
+
+  useEffect(() => {
+    return () => {
+      window.api.removeEventListeners("getTagId");
+    };
+  }, []);
 
   return (
     <div>
@@ -98,7 +107,7 @@ export default function FormDialog({ open, setOpen }) {
         onEnter={handleEnter}
         aria-labelledby="form-dialog-title"
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <DialogTitle id="form-dialog-title">Ingresar Empleado</DialogTitle>
           <DialogContent>
             <DialogContentText>
@@ -113,7 +122,7 @@ export default function FormDialog({ open, setOpen }) {
             />
             <TextField
               fullWidth
-              label="Nombres"
+              label="Nombre"
               error={errors.name}
               {...register("name", { required: true })}
               required
