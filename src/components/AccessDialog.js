@@ -72,6 +72,7 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
       .add({
         date: new Date(),
         userId: rfidTag,
+        type: isCheckout ? "checkout" : "checkin",
       })
       .then((docRef) => {
         const savedDate = new Date();

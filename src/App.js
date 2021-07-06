@@ -1,7 +1,7 @@
 import React from "react";
 
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Switch,
   Route,
   Redirect,
@@ -9,6 +9,7 @@ import {
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import StaffPage from "./pages/StaffPage";
 import { useUserState } from "./providers/UserProvider";
 
 import "./App.css";
@@ -21,8 +22,8 @@ function App() {
           <Home />
         </Route>
         <Route path="/login" render={() => <Redirect to="/" />} exact={true} />
+        <Route path="/staff/:id" component={StaffPage} exact={true} />
         <Route render={() => <Redirect to="/" />} />
-
       </Switch>
     </Router>
   );
@@ -39,6 +40,8 @@ function UnAuthApp() {
         <Route path="/login" exact>
           <Login />
         </Route>
+
+        <Route render={() => <Redirect to="/" />} />
       </Switch>
     </Router>
   );

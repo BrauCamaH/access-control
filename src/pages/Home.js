@@ -6,20 +6,11 @@ import { AppBar, Toolbar, Typography, Button, Chip } from "@material-ui/core";
 import { useUserState } from "../providers/UserProvider";
 
 import CreateUserDialog from "../CreateUserDialog";
-import AccessDialog from "../components/AccessDialog";
+import Access from "./Access";
+import Admin from "./Admin";
 import { auth } from "../firebase";
 
 const useStyles = makeStyles((theme) => ({
-  marginButton: {
-    marginRight: theme.spacing(2),
-  },
-  center: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "90vh",
-  },
   appBar: {
     display: "flex",
     flexDirection: "row",
@@ -40,8 +31,6 @@ export default function Home() {
 
   const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const [isCheckout, setIsCheckout] = useState(false);
-  const [openAccessDialog, setOpenAccessDialog] = useState(false);
 
   const [rfidStatus, setRfidStatus] = useState({
     success: false,
@@ -106,35 +95,8 @@ export default function Home() {
           </div>
         </Toolbar>
       </AppBar>
-      <div maxWidth="sm" className={classes.center}>
-        <Button
-          className={classes.marginButton}
-          variant="outlined"
-          color="primary"
-          onClick={() => {
-            setIsCheckout(false);
-            setOpenAccessDialog(true);
-          }}
-        >
-          Registrar Entrada
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => {
-            setIsCheckout(true);
-            setOpenAccessDialog(true);
-          }}
-        >
-          Registrar Salida
-        </Button>
-      </div>
+      {user ? <Admin /> : <Access />}
       {user ? <CreateUserDialog open={open} setOpen={setOpen} /> : null}
-      <AccessDialog
-        open={openAccessDialog}
-        setOpen={setOpenAccessDialog}
-        isCheckout={isCheckout}
-      />
     </div>
   );
 }

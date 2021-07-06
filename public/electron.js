@@ -33,7 +33,7 @@ const createWindow = () => {
   );
 
   // Setting Window Icon - Asset file needs to be in the public/images folder.
-  mainWindow.setIcon(path.join(__dirname, "logo192.png"));
+  mainWindow.setIcon(path.join(__dirname, "logo-vn.png"));
 
   // In development mode, if the window has loaded, then load the dev tools.
   if (isDev) {
