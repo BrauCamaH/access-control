@@ -12,7 +12,7 @@ let mainWindow;
 // Initializing the Electron Window
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 600, // width of window
+    width: 1200, // width of window
     height: 600, // height of window
     webPreferences: {
       // The preload file where we will perform our app communication
@@ -24,6 +24,7 @@ const createWindow = () => {
     },
   });
 
+  !isDev && mainWindow.setMenu(null);
   // Loading a webpage inside the electron window we just created
   mainWindow.loadURL(
     isDev
@@ -32,7 +33,7 @@ const createWindow = () => {
   );
 
   // Setting Window Icon - Asset file needs to be in the public/images folder.
-  mainWindow.setIcon(path.join(__dirname, "images/appicon.ico"));
+  mainWindow.setIcon(path.join(__dirname, "logo-vn.png"));
 
   // In development mode, if the window has loaded, then load the dev tools.
   if (isDev) {
@@ -82,9 +83,31 @@ ipcMain.on("quit-app", (args) => {
 });
 
 ipcMain.on("requestTag", async (event, args) => {
-  console.log("rfid detectado");
   parser.on("data", (data) => {
     console.log(data);
     event.sender.send("getTagId", data);
   });
+});
+
+let rfidStatus;
+
+port.on("open", () => {
+  console.log("Rfid detectado");
+  rfidStatus = {
+    message: "Lector Detectado",
+    success: true,
+  };
+});
+
+port.on("error", () => {
+  console.log("Error en lector");
+  rfidStatus = {
+    message: "Error en lector",
+    success: false,
+  };
+});
+
+ipcMain.on("requestRfidStatus", async (event, args) => {
+  console.log("Rfid Status requested", rfidStatus);
+  event.sender.send("getRfidStatus", rfidStatus);
 });

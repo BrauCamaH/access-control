@@ -1,60 +1,58 @@
-import React, { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React from "react";
 
 import {
-  Container,
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-} from "@material-ui/core";
+  HashRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 
-import CreateUserDialog from "./CreateUserDialog";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import StaffPage from "./pages/StaffPage";
+import { useUserState } from "./providers/UserProvider";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-}));
+import "./App.css";
 
-export default function ButtonAppBar() {
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-
+function App() {
   return (
-    <div className={classes.root}>
-      <AppBar position="static">
-        <CreateUserDialog open={open} setOpen={setOpen} />
-
-        <Toolbar>
-          <Typography variant="h6" className={classes.title}>
-            Villanapoli Control Acceso
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            Ingresar Usuario
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Container maxWidth="sm">
-        <Button variant="outlined" color="primary">
-          Ingresar
-        </Button>
-        <Button variant="outlined" color="secondary">
-          Primary
-        </Button>
-      </Container>
-
-    </div>
+    <Router>
+      <Switch>
+        <Route path="/" exact>
+          <Home />
+        </Route>
+        <Route path="/login" render={() => <Redirect to="/" />} exact={true} />
+        <Route path="/staff/:id" component={StaffPage} exact={true} />
+        <Route render={() => <Redirect to="/" />} />
+      </Switch>
+    </Router>
   );
+}
+
+function UnAuthApp() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/" exact>
+          <Home />
+        </Route>
+
+        <Route path="/login" exact>
+          <Login />
+        </Route>
+
+        <Route render={() => <Redirect to="/" />} />
+      </Switch>
+    </Router>
+  );
+}
+
+export default function AuthOrDefault() {
+  const user = useUserState();
+
+  if (user) {
+    return <App />;
+  } else {
+    return <UnAuthApp />;
+  }
 }

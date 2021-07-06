@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -8,14 +8,27 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { useForm } from "react-hook-form";
 
+import LoadingBackdrop from "./components/LoadingBackdrop";
+import Notification from "./components/Notification";
+
+import audioSrc from "./beep.mp3";
+
 import { db } from "./firebase";
 
 export default function FormDialog({ open, setOpen }) {
-  const { register, handleSubmit } = useForm();
+  const audio = useRef(new Audio(audioSrc));
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+  } = useForm();
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [result, setResult] = useState("");
 
   const [rfidTag, setRfidTag] = useState("");
   const onSubmit = (data) => {
@@ -23,9 +36,12 @@ export default function FormDialog({ open, setOpen }) {
     const { name, firstLastName, secondLastName, email, birthday, address } =
       data;
     if (!rfidTag) {
+      setError(true);
+      setResult(`No se a ingreso un identificador`);
       return;
     }
 
+    setLoading(true);
     db.collection("users")
       .doc(rfidTag)
       .set({
@@ -37,38 +53,65 @@ export default function FormDialog({ open, setOpen }) {
       })
       .then((docRef) => {
         console.log("Document written");
+        setResult(`Usuario creado con id ${rfidTag}`);
+
+        setLoading(false);
+        setSuccess(true);
+        handleClose();
       })
       .catch((error) => {
         console.error("Error adding document: ", error);
+        setLoading(false);
+        setError(true);
       });
   };
-  const handleClickOpen = () => {
-    setOpen(true);
+
+  const handleClose = () => {
+    setOpen(false);
+    setRfidTag("");
+    clearErrors();
+    window.api.removeEventListeners("getTagId");
   };
 
-  useEffect(() => {
-    window.api.requestTagId();
-  }, []);
+  function handleEnter() {
+    window.api.getTagId((data) => {
+      setRfidTag(data);
+      audio.current.play();
+    });
+  }
 
   useEffect(() => {
-    window.api.getTagId((data) => setRfidTag(data));
-  }, [rfidTag]);
+    return () => {
+      window.api.removeEventListeners("getTagId");
+    };
+  }, []);
 
   return (
     <div>
-      <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-        Open form dialog
-      </Button>
+      <LoadingBackdrop open={loading} />
+      <Notification
+        open={success}
+        setOpen={setSuccess}
+        type="success"
+        message={result}
+      />
+      <Notification
+        open={error}
+        setOpen={setError}
+        type="error"
+        message={result}
+      />
       <Dialog
         open={open}
         onClose={handleClose}
+        onEnter={handleEnter}
         aria-labelledby="form-dialog-title"
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle id="form-dialog-title">Crear Usuario</DialogTitle>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <DialogTitle id="form-dialog-title">Ingresar Empleado</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Para crear un usuario es neceario tener una tarjeta rfid.
+              Para crear un empledo es necesario tener una tarjeta rfid.
             </DialogContentText>
             <TextField
               value={rfidTag}
@@ -77,40 +120,59 @@ export default function FormDialog({ open, setOpen }) {
               disabled
               required
             />
-            <TextField fullWidth label="Nombres" {...register("name")} />
+            <TextField
+              fullWidth
+              label="Nombre"
+              error={errors.name}
+              {...register("name", { required: true })}
+              required
+            />
             <TextField
               fullWidth
               label="Primer Apellido"
-              {...register("firstLastName")}
+              error={errors.firstLastName}
+              required
+              {...register("firstLastName", { required: true })}
             />
             <TextField
               fullWidth
               label="Segundo Apellido"
-              {...register("secondLastName")}
+              error={errors.seconLastName}
+              {...register("seconLastName")}
             />
             <TextField
               fullWidth
+              type="email"
+              error={errors.birthday}
               label="Correo Electronico"
               {...register("email")}
+              required
             />
 
-            <TextField fullWidth label="Domicilio" {...register("address")} />
             <TextField
               fullWidth
+              label="Domicilio"
+              {...register("address", { required: true })}
+              required
+            />
+            <TextField
+              fullWidth
+              error={errors.birthday}
               InputLabelProps={{
                 shrink: true,
               }}
               label="Fecha de Nacimiendo"
               type="date"
-              {...register("birthday")}
+              {...register("birthday", { required: true })}
+              required
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} color="primary">
-              Cancel
+            <Button onClick={handleClose} color="secondary">
+              Cerrar
             </Button>
             <Button type="submit" color="primary">
-              Crear Usuario
+              Crear Empleado
             </Button>
           </DialogActions>
         </form>
