@@ -52,7 +52,7 @@ export default function InteractiveList() {
 
   useEffect(() => {
     setLoading(true);
-    const staffRef = db.collection("users");
+    const staffRef = db.collection("staff");
     staffRef
       .limit(10)
       .get()
@@ -86,8 +86,12 @@ export default function InteractiveList() {
           <List>
             {staff
               ? staff?.map((s) => (
-                  <NavLink className={classes.link} to={`/staff/${s.id}`}>
-                    <ListItem key={s.id} button>
+                  <NavLink
+                    key={s.id}
+                    className={classes.link}
+                    to={`/staff/${s.id}`}
+                  >
+                    <ListItem button>
                       <ListItemAvatar>
                         <Avatar>
                           <FolderIcon />

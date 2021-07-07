@@ -2,31 +2,24 @@ import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Container from "@material-ui/core/Container";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
-import Avatar from "@material-ui/core/Avatar";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
 
-import AccessIcon from "@material-ui/icons/AccessTime";
 import NavigateBackIcon from "@material-ui/icons/NavigateBefore";
-import MeetingRoom from "@material-ui/icons/MeetingRoom";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
 import LoadingBackdrop from "../components/LoadingBackdrop";
 import StaffData from "../components/StaffData";
+import AccessInfo from "../components/AccessInfo";
+import AccessTable from "../components/AccessTable";
 
 import { green, red } from "@material-ui/core/colors";
 
 import { db } from "../firebase";
-
-import { formatAMPM, isCheckout } from "../utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -55,7 +48,7 @@ export default function StaffPage() {
 
   const classes = useStyles();
 
-  const [accessData, setAccessData] = useState([]);
+  const [accessData, setAccessData] = useState();
   const [staffData, setStaffData] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -63,37 +56,44 @@ export default function StaffPage() {
 
   useEffect(() => {
     setLoading(true);
-    db.collection("users")
+    db.collection("staff")
       .doc(params.id)
       .get()
-      .then((doc) => {
-        setStaffData({ ...doc.data() });
+      .then((staff) => {
+        setStaffData({ id: staff.id, ...staff.data() });
+
+        const staffRef = db.collection("staff").doc(staff.id);
+        staffRef
+          .collection("access")
+          .limit(10)
+          .orderBy("access", "desc")
+          .get()
+          .then((snap) => {
+            const access = snap.docs.map((doc) => {
+              return { id: doc.id, ...doc.data() };
+            });
+
+            setAccessData(access);
+
+            console.log(access);
+
+            setLoading(false);
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.log(error);
+            setError(true);
+          });
       })
       .catch((error) => {
         console.log(error);
         setLoading(false);
       });
-
-    const staffRef = db.collection("access");
-    staffRef
-      .limit(10)
-      .where("userId", "==", params.id)
-      .get()
-      .then((snap) => {
-        setLoading(false);
-
-        const staff = snap.docs.map((doc) => {
-          return { id: doc.id, ...doc.data() };
-        });
-
-        setAccessData(staff);
-      })
-      .catch((error) => {
-        setLoading(false);
-
-        setError(true);
-      });
   }, []);
+
+  if (loading) {
+    return <LoadingBackdrop open={loading} />;
+  }
 
   return (
     <>
@@ -102,7 +102,7 @@ export default function StaffPage() {
           <Button
             size="small"
             onClick={() => {
-              history.goBack();
+              history.push("/");
             }}
           >
             <NavigateBackIcon />
@@ -111,8 +111,6 @@ export default function StaffPage() {
         </Toolbar>
       </AppBar>
       <Container className={classes.root}>
-        <LoadingBackdrop open={loading} />
-
         <Grid item xs={12} md={12}>
           <StaffData staff={staffData} />
           <Typography variant="h6" className={classes.title}>
@@ -120,31 +118,11 @@ export default function StaffPage() {
           </Typography>
           <div className={classes.demo}>
             <List>
-              {accessData
-                ? accessData?.map((access) => (
-                    <ListItem key={access.id} button>
-                      <ListItemAvatar>
-                        <Avatar>
-                          <AccessIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={`${access.date
-                          .toDate()
-                          .toLocaleDateString()} a las ${formatAMPM(
-                          access.date.toDate()
-                        )}`}
-                      />
-                      <ListItemSecondaryAction>
-                        {isCheckout(access.type) ? (
-                          <ExitToAppIcon className={classes.danger} />
-                        ) : (
-                          <MeetingRoom className={classes.success} />
-                        )}
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))
-                : null}
+              {accessData ? (
+                accessData.legth !== 0 ? (
+                  <AccessTable rows={accessData} />
+                ) : null
+              ) : null}
             </List>
           </div>
         </Grid>

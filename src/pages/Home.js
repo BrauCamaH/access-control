@@ -69,7 +69,7 @@ export default function Home() {
                     setOpen(true);
                   }}
                 >
-                  Gestionar Empleados
+                  Crear Empleado
                 </Button>
                 <Button
                   color="secondary"

@@ -43,6 +43,93 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
     setRfidTag(null);
   }
 
+  function createAccess() {
+    let staffRef = db.collection("staff").doc(staffData.tagId);
+
+    db.collection("staff")
+      .doc(staffData.tagId)
+      .collection("access")
+      .add({
+        access: new Date(),
+      })
+      .then((docRef) => {
+        const savedDate = new Date();
+
+        staffRef
+          .update({
+            currentAccessId: docRef.id,
+            status: "accessed",
+          })
+          .then((doc) => {
+            console.log(doc);
+            setStatusMessage(
+              `${"Entrada "} Guardada el ${savedDate.toLocaleDateString()} a las ${formatAMPM(
+                savedDate
+              )}`
+            );
+            setLoading(false);
+            setSuccess(true);
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.error("Error adding document: ", error);
+          });
+        console.log("Access Saved");
+
+        handleClose();
+      })
+      .catch((error) => {
+        setLoading(false);
+        setStatusMessage(`Revise conexion a internet`);
+        setError(true);
+
+        console.error("Error adding document: ", error);
+      });
+  }
+
+  function setCheckout() {
+    let staffRef = db.collection("staff").doc(staffData.tagId);
+
+    staffRef
+      .collection("access")
+      .doc(staffData.currentAccessId)
+      .update({
+        checkout: new Date(),
+      })
+      .then((docRef) => {
+        const savedDate = new Date();
+
+        staffRef
+          .update({
+            currentAccessId: null,
+            status: "finished",
+          })
+          .then((doc) => {
+            setStatusMessage(
+              `${"Salida "} Guardada el ${savedDate.toLocaleDateString()} a las ${formatAMPM(
+                savedDate
+              )}`
+            );
+            setLoading(false);
+            setSuccess(true);
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.error("Error adding document: ", error);
+          });
+        console.log("Access Saved");
+
+        handleClose();
+      })
+      .catch((error) => {
+        setLoading(false);
+        setStatusMessage(`Revise conexion a internet`);
+        setError(true);
+
+        console.error("Error adding document: ", error);
+      });
+  }
+
   const handleAccess = (e) => {
     e.preventDefault();
 
@@ -64,51 +151,14 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
       return;
     }
 
-    let userRef = db.collection("users").doc(rfidTag);
-
     setLoading(true);
 
-    db.collection("access")
-      .add({
-        date: new Date(),
-        userId: rfidTag,
-        type: isCheckout ? "checkout" : "checkin",
-      })
-      .then((docRef) => {
-        const savedDate = new Date();
-        setStatusMessage(
-          `${
-            isCheckout ? "Salida " : "Entrada "
-          } Guardada el ${savedDate.toLocaleDateString()} a las ${formatAMPM(
-            savedDate
-          )}`
-        );
-        setLoading(false);
-        setSuccess(true);
+    if (isCheckout) {
+      setCheckout();
+      return;
+    }
 
-        console.log("Access Saved");
-
-        handleClose();
-
-        userRef
-          .update({
-            status: isCheckout ? "finished" : "accessed",
-          })
-          .then(() => {
-            setLoading(false);
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.error("Error adding document: ", error);
-          });
-      })
-      .catch((error) => {
-        setLoading(false);
-        setStatusMessage(`Revise conexion a internet`);
-        setError(true);
-
-        console.error("Error adding document: ", error);
-      });
+    createAccess();
   };
 
   const handleClose = () => {
@@ -130,17 +180,19 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
     setValidTag(false);
     setLoading(true);
 
-    db.collection("users")
-      .doc(rfidTag)
+    db.collection("staff")
+      .where("tagId", "==", rfidTag)
       .get()
-      .then((doc) => {
+      .then((snap) => {
+        console.log(snap.docs);
         setLoading(false);
 
-        if (doc.exists) {
+        const doc = snap.docs[0];
+        if (doc) {
           setValidTag(true);
 
           console.log(doc.data());
-          setStaffData({ ...doc.data() });
+          setStaffData({ id: doc.id, ...doc.data() });
 
           return;
         }

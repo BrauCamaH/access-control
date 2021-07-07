@@ -42,7 +42,7 @@ export default function FormDialog({ open, setOpen }) {
     }
 
     setLoading(true);
-    db.collection("users")
+    db.collection("staff")
       .doc(rfidTag)
       .set({
         name: `${name} ${firstLastName} ${secondLastName}`,
@@ -50,9 +50,11 @@ export default function FormDialog({ open, setOpen }) {
         birthday,
         address,
         status: "registered",
+        tagId: rfidTag,
+        currentAccessId: null,
       })
       .then((docRef) => {
-        console.log("Document written");
+        console.log("Document written", docRef);
         setResult(`Usuario creado con id ${rfidTag}`);
 
         setLoading(false);
@@ -137,8 +139,8 @@ export default function FormDialog({ open, setOpen }) {
             <TextField
               fullWidth
               label="Segundo Apellido"
-              error={errors.seconLastName}
-              {...register("seconLastName")}
+              error={errors.secondLastName}
+              {...register("secondLastName")}
             />
             <TextField
               fullWidth
