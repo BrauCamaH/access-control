@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -7,7 +7,11 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import IconButton from "@material-ui/core/IconButton";
 
+import EditIcon from "@material-ui/icons/Edit";
+
+import EditDialog from "./EditAccessDialog";
 import { formatAMPM, timeDiffCalc, GetReadableDate } from "../utils";
 
 const useStyles = makeStyles({
@@ -18,6 +22,8 @@ const useStyles = makeStyles({
 
 export default function BasicTable({ rows }) {
   const classes = useStyles();
+  const [open, setOpen] = useState();
+  const [selectedAccess, setSelectedAccess] = useState();
 
   return (
     <TableContainer component={Paper}>
@@ -28,6 +34,7 @@ export default function BasicTable({ rows }) {
             <TableCell>Entrada</TableCell>
             <TableCell>Salida</TableCell>
             <TableCell>Tiempo Total</TableCell>
+            <TableCell>Acciones</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -48,10 +55,32 @@ export default function BasicTable({ rows }) {
                     ? timeDiffCalc(checkoutDate, accessDate)
                     : "No ha salido"}
                 </TableCell>
+                <TableCell>
+                  <IconButton aria-label="settings">
+                    <EditIcon
+                      onClick={() => {
+                        setSelectedAccess(row);
+                        setOpen(true);
+                      }}
+                    />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
+        {selectedAccess ? (
+          <EditDialog
+            accessDate={selectedAccess.access.toDate()}
+            checkoutDate={
+              selectedAccess.checkout
+                ? selectedAccess.checkout.toDate()
+                : undefined
+            }
+            open={open}
+            setOpen={setOpen}
+          />
+        ) : null}
       </Table>
     </TableContainer>
   );

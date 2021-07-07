@@ -8,22 +8,28 @@ import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
+import Chip from "@material-ui/core/Chip";
 
 import NavigateBackIcon from "@material-ui/icons/NavigateBefore";
 
 import LoadingBackdrop from "../components/LoadingBackdrop";
 import StaffData from "../components/StaffData";
-import AccessInfo from "../components/AccessInfo";
 import AccessTable from "../components/AccessTable";
 
 import { green, red } from "@material-ui/core/colors";
 
 import { db } from "../firebase";
+import { getStatusInfo } from "../utils";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+  },
+  appBar: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     margin: theme.spacing(4, 0, 2),
@@ -108,6 +114,10 @@ export default function StaffPage() {
             <NavigateBackIcon />
             <Typography variant="h6">Regresar</Typography>
           </Button>
+          <Chip
+            label={getStatusInfo(staffData.status)}
+            color={staffData.status === "accessed" ? "primary" : "secondary"}
+          />
         </Toolbar>
       </AppBar>
       <Container className={classes.root}>
