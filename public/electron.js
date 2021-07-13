@@ -72,6 +72,7 @@ process.on("uncaughtException", (error) => {
 ipcMain.on("quit-app", (args) => {
   app.quit();
 });
+let portDetected = false;
 
 ipcMain.on("requestTag", async (event, args) => {
   SerialPort.list()
@@ -80,36 +81,41 @@ ipcMain.on("requestTag", async (event, args) => {
         console.log("No ports discovered");
       } else {
         console.log("ports", ports);
-        const port = new SerialPort([ports[0].comName], { baudRate: 9600 });
-        const parser = port.pipe(new Readline({ delimiter: "\n" }));
-
         let rfidStatus;
 
-        port.on("open", () => {
-          console.log("Rfid detectado");
-          rfidStatus = {
-            message: "Lector Detectado",
-            success: true,
-          };
-        });
+        if (!portDetected) {
+          const port = new SerialPort(ports[0].path, { baudRate: 9600 });
+          const parser = port.pipe(new Readline({ delimiter: "\n" }));
 
-        port.on("error", () => {
-          console.log("Error en lector");
-          rfidStatus = {
-            message: "Error en lector",
-            success: false,
-          };
-        });
+          port.on("error", (error) => {
+            console.log("Error en lector", error);
+            portDetected = false;
 
-        ipcMain.on("requestRfidStatus", async (event, args) => {
-          console.log("Rfid Status requested", rfidStatus);
-          event.sender.send("getRfidStatus", rfidStatus);
-        });
+            rfidStatus = {
+              message: "Error en lector",
+              success: false,
+            };
+          });
 
-        parser.on("data", (data) => {
-          console.log(data);
-          event.sender.send("getTagId", data);
-        });
+          port.on("open", () => {
+            console.log("Rfid detectado");
+            portDetected = true;
+            rfidStatus = {
+              message: "Lector Detectado",
+              success: true,
+            };
+          });
+
+          ipcMain.on("requestRfidStatus", async (event, args) => {
+            console.log("Rfid Status requested", rfidStatus);
+            event.sender.send("getRfidStatus", rfidStatus);
+          });
+
+          parser.on("data", (data) => {
+            console.log(data);
+            event.sender.send("getTagId", data);
+          });
+        }
       }
     })
     .catch((err) => console.log(err.message));

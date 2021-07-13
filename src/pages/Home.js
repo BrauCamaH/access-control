@@ -36,6 +36,8 @@ export default function Home() {
     success: false,
     message: "Error en lector",
   });
+
+  
   useEffect(() => {
     window.api.requestRfidStatus();
     window.api.requestTagId();
@@ -58,8 +60,8 @@ export default function Home() {
           <Typography variant="h6">Control de Acceso</Typography>
           <div>
             <Chip
-              label={rfidStatus.message}
-              color={rfidStatus.success ? "primary" : "secondary"}
+              label={rfidStatus?.message}
+              color={rfidStatus?.success ? "primary" : "secondary"}
             />
             {user ? (
               <>
