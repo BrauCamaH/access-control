@@ -43,7 +43,7 @@ export default function FormDialog({ open, setOpen }) {
 
     setLoading(true);
     db.collection("staff")
-      .doc(rfidTag)
+      .doc()
       .set({
         name: `${name} ${firstLastName} ${secondLastName}`,
         email,
@@ -55,6 +55,7 @@ export default function FormDialog({ open, setOpen }) {
       })
       .then((docRef) => {
         console.log("Document written", docRef);
+        window.location.reload();
         setResult(`Usuario creado con id ${rfidTag}`);
 
         setLoading(false);
@@ -150,7 +151,6 @@ export default function FormDialog({ open, setOpen }) {
               {...register("email")}
               required
             />
-
             <TextField
               fullWidth
               label="Domicilio"

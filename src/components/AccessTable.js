@@ -20,7 +20,7 @@ const useStyles = makeStyles({
   },
 });
 
-export default function BasicTable({ rows }) {
+export default function BasicTable({ rows, staffId }) {
   const classes = useStyles();
   const [open, setOpen] = useState();
   const [selectedAccess, setSelectedAccess] = useState();
@@ -77,8 +77,11 @@ export default function BasicTable({ rows }) {
                 ? selectedAccess.checkout.toDate()
                 : undefined
             }
+            id={selectedAccess.id}
+            sta
             open={open}
             setOpen={setOpen}
+            staffId={staffId}
           />
         ) : null}
       </Table>

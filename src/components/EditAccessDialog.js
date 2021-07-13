@@ -11,12 +11,15 @@ import LoadingBackdrop from "./LoadingBackdrop";
 import Notification from "./Notification";
 
 import { getDateTimeLocalToString } from "../utils";
+import { db } from "../firebase";
 
 export default function FormDialog({
   open,
   setOpen,
   accessDate,
   checkoutDate,
+  id,
+  staffId,
 }) {
   const {
     handleSubmit,
@@ -34,6 +37,34 @@ export default function FormDialog({
 
   const onSubmit = (data) => {
     console.log(data);
+
+    const { access, checkout } = data;
+
+    setLoading(true);
+    db.collection("staff")
+      .doc(staffId)
+      .collection("access")
+      .doc(id)
+      .update({
+        access: new Date(access),
+        checkout: checkout !== "" ? new Date(checkout) : null,
+      })
+      .then((docRef) => {
+        console.log("Document written", docRef);
+        setResult(`Se ha modificado acceso`);
+        window.location.reload();
+
+        setLoading(false);
+        setSuccess(true);
+        handleClose();
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+        setResult(`Error al intentar modificar acceso`);
+
+        setLoading(false);
+        setError(true);
+      });
   };
 
   const updateFieldValue = (fieldName) => {
@@ -54,7 +85,7 @@ export default function FormDialog({
     checkoutDate
       ? setValue("checkout", getDateTimeLocalToString(checkoutDate))
       : setValue("checkout", "");
-  }, [accessDate, checkoutDate]);
+  }, [accessDate, checkoutDate, setValue]);
 
   return (
     <div>
@@ -124,14 +155,24 @@ export default function FormDialog({
               />
             ) : null}
             {!checkoutDate ? (
-              <TextField
-                fullWidth
-                error={errors.birthday}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                label="Salida"
-                type="datetime-local"
+              <Controller
+                name="checkout"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <TextField
+                    fullWidth
+                    onChange={updateFieldValue("checkout")}
+                    error={errors.checkout}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    label="Salida"
+                    type="datetime-local"
+                    required
+                    {...field}
+                  />
+                )}
               />
             ) : null}
           </DialogContent>

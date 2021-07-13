@@ -42,7 +42,7 @@ function getStatusInfo(status) {
     : "No ha accedido";
 }
 
-export default function InteractiveList() {
+export default function Admin() {
   const classes = useStyles();
 
   const [staff, setStaff] = useState([]);
@@ -73,6 +73,10 @@ export default function InteractiveList() {
         setError(true);
       });
   }, []);
+
+  if (error) {
+    return <p>Revise conexion a internet</p>;
+  }
 
   return (
     <Container className={classes.root}>

@@ -44,10 +44,9 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
   }
 
   function createAccess() {
-    let staffRef = db.collection("staff").doc(staffData.tagId);
+    let staffRef = db.collection("staff").doc(staffData.id);
 
-    db.collection("staff")
-      .doc(staffData.tagId)
+    staffRef
       .collection("access")
       .add({
         access: new Date(),
@@ -88,7 +87,7 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
   }
 
   function setCheckout() {
-    let staffRef = db.collection("staff").doc(staffData.tagId);
+    let staffRef = db.collection("staff").doc(staffData.id);
 
     staffRef
       .collection("access")
@@ -191,7 +190,7 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
         if (doc) {
           setValidTag(true);
 
-          console.log(doc.data());
+          console.log({ id: doc.id, ...doc.data() });
           setStaffData({ id: doc.id, ...doc.data() });
 
           return;

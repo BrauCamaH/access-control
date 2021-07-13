@@ -93,12 +93,16 @@ export default function StaffPage() {
       })
       .catch((error) => {
         console.log(error);
+        setError(true);
         setLoading(false);
       });
   }, []);
 
   if (loading) {
     return <LoadingBackdrop open={loading} />;
+  }
+  if (error) {
+    return <p>Revise conexion</p>;
   }
 
   return (
@@ -130,7 +134,7 @@ export default function StaffPage() {
             <List>
               {accessData ? (
                 accessData.legth !== 0 ? (
-                  <AccessTable rows={accessData} />
+                  <AccessTable rows={accessData} staffId={staffData?.id} />
                 ) : null
               ) : null}
             </List>

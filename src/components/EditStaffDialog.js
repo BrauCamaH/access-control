@@ -5,6 +5,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Select from "@material-ui/core/Select";
 import { useForm, Controller } from "react-hook-form";
 
 import LoadingBackdrop from "./LoadingBackdrop";
@@ -13,6 +14,8 @@ import Notification from "./Notification";
 import audioSrc from "../beep.mp3";
 
 import { db } from "../firebase";
+import MenuItem from "@material-ui/core/MenuItem";
+import { InputLabel } from "@material-ui/core";
 
 export default function FormDialog({ open, setOpen, staffData }) {
   const audio = useRef(new Audio(audioSrc));
@@ -30,9 +33,10 @@ export default function FormDialog({ open, setOpen, staffData }) {
   const [success, setSuccess] = useState(false);
   const [result, setResult] = useState("");
 
-  const [rfidTag, setRfidTag] = useState(staffData.tagId);
+  const [rfidTag, setRfidTag] = useState(null  );
 
   const [state, setState] = useState({
+    status: staffData.status,
     name: staffData.name,
     email: staffData.email,
     address: staffData.address,
@@ -47,7 +51,7 @@ export default function FormDialog({ open, setOpen, staffData }) {
 
   const onSubmit = (data) => {
     console.log(data);
-    const { name, email, birthday, address } = state;
+    const { name, email, birthday, address, status } = data;
 
     setLoading(true);
     db.collection("staff")
@@ -57,10 +61,12 @@ export default function FormDialog({ open, setOpen, staffData }) {
         email,
         birthday,
         address,
-        tagId: rfidTag,
+        status ,
+        tagId: rfidTag ? rfidTag : staffData.tagId,
       })
       .then((docRef) => {
         console.log("Document written", docRef);
+        window.location.reload();
         setResult(`Se ha actualizado usuario`);
 
         setLoading(false);
@@ -82,12 +88,6 @@ export default function FormDialog({ open, setOpen, staffData }) {
   };
 
   function handleEnter() {
-    setState({
-      name: staffData.name,
-      email: staffData.email,
-      address: staffData.address,
-      birthday: staffData.birthday,
-    });
     reset();
 
     window.api.getTagId((data) => {
@@ -101,6 +101,16 @@ export default function FormDialog({ open, setOpen, staffData }) {
       window.api.removeEventListeners("getTagId");
     };
   }, []);
+
+  useEffect(() => {
+    setState({
+      status: staffData.status,
+      name: staffData.name,
+      email: staffData.email,
+      address: staffData.address,
+      birthday: staffData.birthday,
+    });
+  }, [staffData]);
 
   return (
     <div>
@@ -133,7 +143,28 @@ export default function FormDialog({ open, setOpen, staffData }) {
               disabled
               required
             />
-
+            <div style={{ paddingBottom: "10px", paddingTop: "10px" }}>
+              <Controller
+                name="status"
+                control={control}
+                defaultValue={state.status}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <>
+                    <InputLabel id="select-status">Estado</InputLabel>
+                    <Select
+                      labelId="select-status"
+                      value={state?.status}
+                      onChange={updateFieldValue("status")}
+                      {...field}
+                    >
+                      <MenuItem value="accessed">Accedio</MenuItem>
+                      <MenuItem value="finished">Salio</MenuItem>
+                    </Select>
+                  </>
+                )}
+              />
+            </div>
             <Controller
               name="name"
               control={control}
