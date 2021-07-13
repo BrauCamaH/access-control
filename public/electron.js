@@ -4,8 +4,6 @@ const path = require("path");
 
 const SerialPort = require("serialport");
 const Readline = require("@serialport/parser-readline");
-const port = new SerialPort("/dev/ttyUSB0", { baudRate: 9600 });
-const parser = port.pipe(new Readline({ delimiter: "\n" }));
 
 let mainWindow;
 
@@ -34,13 +32,6 @@ const createWindow = () => {
 
   // Setting Window Icon - Asset file needs to be in the public/images folder.
   mainWindow.setIcon(path.join(__dirname, "logo-vn.png"));
-
-  // In development mode, if the window has loaded, then load the dev tools.
-  if (isDev) {
-    mainWindow.webContents.on("did-frame-finish-load", () => {
-      mainWindow.webContents.openDevTools({ mode: "detach" });
-    });
-  }
 };
 
 // ((OPTIONAL)) Setting the location for the userdata folder created by an Electron app. It default to the AppData folder if you don't set it.
@@ -83,31 +74,43 @@ ipcMain.on("quit-app", (args) => {
 });
 
 ipcMain.on("requestTag", async (event, args) => {
-  parser.on("data", (data) => {
-    console.log(data);
-    event.sender.send("getTagId", data);
-  });
-});
+  SerialPort.list()
+    .then((ports) => {
+      if (ports.length === 0) {
+        console.log("No ports discovered");
+      } else {
+        console.log("ports", ports);
+        const port = new SerialPort([ports[0].comName], { baudRate: 9600 });
+        const parser = port.pipe(new Readline({ delimiter: "\n" }));
 
-let rfidStatus;
+        let rfidStatus;
 
-port.on("open", () => {
-  console.log("Rfid detectado");
-  rfidStatus = {
-    message: "Lector Detectado",
-    success: true,
-  };
-});
+        port.on("open", () => {
+          console.log("Rfid detectado");
+          rfidStatus = {
+            message: "Lector Detectado",
+            success: true,
+          };
+        });
 
-port.on("error", () => {
-  console.log("Error en lector");
-  rfidStatus = {
-    message: "Error en lector",
-    success: false,
-  };
-});
+        port.on("error", () => {
+          console.log("Error en lector");
+          rfidStatus = {
+            message: "Error en lector",
+            success: false,
+          };
+        });
 
-ipcMain.on("requestRfidStatus", async (event, args) => {
-  console.log("Rfid Status requested", rfidStatus);
-  event.sender.send("getRfidStatus", rfidStatus);
+        ipcMain.on("requestRfidStatus", async (event, args) => {
+          console.log("Rfid Status requested", rfidStatus);
+          event.sender.send("getRfidStatus", rfidStatus);
+        });
+
+        parser.on("data", (data) => {
+          console.log(data);
+          event.sender.send("getTagId", data);
+        });
+      }
+    })
+    .catch((err) => console.log(err.message));
 });

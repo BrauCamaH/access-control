@@ -50,7 +50,7 @@ export default function StaffData({ staff }) {
           Fecha de Nacimiento: {staff.birthday}
         </Typography>
       </CardContent>
-      <EditDialog open={open} setOpen={setOpen} />
+      <EditDialog open={open} setOpen={setOpen} staffData={staff}/>
     </Card>
   );
 }

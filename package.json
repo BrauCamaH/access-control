@@ -24,7 +24,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start-react": "BROWSER=none react-scripts start",
+    "start-react": "react-scripts start",
     "start-electron": "nodemon --watch ./public/* --exec \"electron .\"",
     "dev": "concurrently \"yarn start-react\" \"wait-on http://localhost:3000 && yarn start-electron\"",
     "postinstall": "electron-builder install-app-deps",

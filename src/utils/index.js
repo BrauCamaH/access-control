@@ -77,3 +77,9 @@ export function GetReadableDate(date) {
     date.getFullYear()
   );
 }
+
+export function getDateTimeLocalToString(date) {
+  return new Date(date.toString().split("GMT")[0] + " UTC")
+    .toISOString()
+    .split(".")[0];
+}

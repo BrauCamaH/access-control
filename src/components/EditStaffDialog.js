@@ -5,7 +5,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 
 import LoadingBackdrop from "./LoadingBackdrop";
 import Notification from "./Notification";
@@ -14,14 +14,15 @@ import audioSrc from "../beep.mp3";
 
 import { db } from "../firebase";
 
-export default function FormDialog({ open, setOpen }) {
+export default function FormDialog({ open, setOpen, staffData }) {
   const audio = useRef(new Audio(audioSrc));
 
   const {
-    register,
+    reset,
     handleSubmit,
     formState: { errors },
     clearErrors,
+    control,
   } = useForm();
 
   const [loading, setLoading] = useState(false);
@@ -29,32 +30,38 @@ export default function FormDialog({ open, setOpen }) {
   const [success, setSuccess] = useState(false);
   const [result, setResult] = useState("");
 
-  const [rfidTag, setRfidTag] = useState("");
+  const [rfidTag, setRfidTag] = useState(staffData.tagId);
+
+  const [state, setState] = useState({
+    name: staffData.name,
+    email: staffData.email,
+    address: staffData.address,
+    birthday: staffData.birthday,
+  });
+
+  const updateFieldValue = (fieldName) => {
+    return (event) => {
+      setState({ ...state, [fieldName]: event.target.value });
+    };
+  };
+
   const onSubmit = (data) => {
     console.log(data);
-    const { name, firstLastName, secondLastName, email, birthday, address } =
-      data;
-    if (!rfidTag) {
-      setError(true);
-      setResult(`No se a ingreso un identificador`);
-      return;
-    }
+    const { name, email, birthday, address } = state;
 
     setLoading(true);
     db.collection("staff")
-      .doc(rfidTag)
-      .set({
-        name: `${name} ${firstLastName} ${secondLastName}`,
+      .doc(staffData.id)
+      .update({
+        name,
         email,
         birthday,
         address,
-        status: "registered",
         tagId: rfidTag,
-        currentAccessId: null,
       })
       .then((docRef) => {
         console.log("Document written", docRef);
-        setResult(`Usuario creado con id ${rfidTag}`);
+        setResult(`Se ha actualizado usuario`);
 
         setLoading(false);
         setSuccess(true);
@@ -75,6 +82,14 @@ export default function FormDialog({ open, setOpen }) {
   };
 
   function handleEnter() {
+    setState({
+      name: staffData.name,
+      email: staffData.email,
+      address: staffData.address,
+      birthday: staffData.birthday,
+    });
+    reset();
+
     window.api.getTagId((data) => {
       setRfidTag(data);
       audio.current.play();
@@ -118,51 +133,81 @@ export default function FormDialog({ open, setOpen }) {
               disabled
               required
             />
-            <TextField
-              fullWidth
-              label="Nombre"
-              error={errors.name}
-              {...register("name", { required: true })}
-              required
+
+            <Controller
+              name="name"
+              control={control}
+              defaultValue={state.name}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  onChange={updateFieldValue("name")}
+                  value={state?.name}
+                  label="Nombre"
+                  error={errors.name}
+                  required
+                  {...field}
+                />
+              )}
             />
-            <TextField
-              fullWidth
-              label="Primer Apellido"
-              error={errors.firstLastName}
-              required
-              {...register("firstLastName", { required: true })}
-            />
-            <TextField
-              fullWidth
-              label="Segundo Apellido"
-              error={errors.secondLastName}
-              {...register("secondLastName")}
-            />
-            <TextField
-              fullWidth
-              type="email"
-              error={errors.birthday}
-              label="Correo Electronico"
-              {...register("email")}
-              required
+            <Controller
+              name="email"
+              control={control}
+              defaultValue={state.email}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  value={state?.email}
+                  onChange={updateFieldValue("email")}
+                  type="email"
+                  error={errors.email}
+                  label="Correo Electronico"
+                  required
+                  {...field}
+                />
+              )}
             />
 
-            <TextField
-              fullWidth
-              label="Domicilio"
-              {...register("address", { required: true })}
-              required
+            <Controller
+              name="address"
+              control={control}
+              defaultValue={state.address}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  error={errors.address}
+                  value={state?.address}
+                  onChange={updateFieldValue("address")}
+                  label="Domicilio"
+                  required
+                  {...field}
+                />
+              )}
             />
-            <TextField
-              fullWidth
-              error={errors.birthday}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              label="Fecha de Nacimiendo"
-              type="date"
-              {...register("birthday", { required: true })}
-              required
+
+            <Controller
+              name="birthday"
+              control={control}
+              defaultValue={state.birthday}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  value={state?.birthday}
+                  onChange={updateFieldValue("birthday")}
+                  error={errors.birthday}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  label="Fecha de Nacimiendo"
+                  type="date"
+                  required
+                  {...field}
+                />
+              )}
             />
           </DialogContent>
           <DialogActions>
@@ -170,7 +215,7 @@ export default function FormDialog({ open, setOpen }) {
               Cerrar
             </Button>
             <Button type="submit" color="primary">
-              Acceptar
+              Modificar
             </Button>
           </DialogActions>
         </form>

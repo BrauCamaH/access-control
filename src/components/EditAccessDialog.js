@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 
 import LoadingBackdrop from "./LoadingBackdrop";
 import Notification from "./Notification";
+
+import { getDateTimeLocalToString } from "../utils";
 
 export default function FormDialog({
   open,
@@ -18,28 +19,42 @@ export default function FormDialog({
   checkoutDate,
 }) {
   const {
-    register,
     handleSubmit,
     formState: { errors },
     clearErrors,
+    control,
+    setValue,
   } = useForm();
+  const [state, setState] = useState({});
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
   const [result, setResult] = useState("");
 
-  const [rfidTag, setRfidTag] = useState("");
-  const onSubmit = (data) => {};
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+
+  const updateFieldValue = (fieldName) => {
+    return (event) => {
+      setState({ ...state, [fieldName]: event.target.value });
+    };
+  };
 
   const handleClose = () => {
     setOpen(false);
-    setRfidTag("");
     clearErrors();
     window.api.removeEventListeners("getTagId");
   };
 
-  function handleEnter() {}
+  useEffect(() => {
+    setValue("access", getDateTimeLocalToString(accessDate));
+
+    checkoutDate
+      ? setValue("checkout", getDateTimeLocalToString(checkoutDate))
+      : setValue("checkout", "");
+  }, [accessDate, checkoutDate]);
 
   return (
     <div>
@@ -59,46 +74,53 @@ export default function FormDialog({
       <Dialog
         open={open}
         onClose={handleClose}
-        onEnter={handleEnter}
         aria-labelledby="form-dialog-title"
       >
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <DialogTitle id="form-dialog-title">Modificar Acceso</DialogTitle>
           <DialogContent>
             {accessDate ? (
-              <TextField
-                fullWidth
-                error={errors.birthday}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                defaultValue={
-                  new Date(accessDate.toString().split("GMT")[0] + " UTC")
-                    .toISOString()
-                    .split(".")[0]
-                }
-                label="Entrada"
-                type="datetime-local"
-                {...register("access", { required: true })}
-                required
+              <Controller
+                name="access"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <TextField
+                    fullWidth
+                    {...field}
+                    defaultValue={state.access}
+                    onChange={updateFieldValue("access")}
+                    error={errors.access}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    label="Entrada"
+                    type="datetime-local"
+                    required
+                  />
+                )}
               />
             ) : null}
             {checkoutDate ? (
-              <TextField
-                fullWidth
-                error={errors.birthday}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                defaultValue={
-                  new Date(checkoutDate.toString().split("GMT")[0] + " UTC")
-                    .toISOString()
-                    .split(".")[0]
-                }
-                label="Salida"
-                type="datetime-local"
-                {...register("checkout", { required: true })}
-                required
+              <Controller
+                name="checkout"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <TextField
+                    fullWidth
+                    defaultValue={state.checkout}
+                    onChange={updateFieldValue("checkout")}
+                    error={errors.checkout}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    label="Salida"
+                    type="datetime-local"
+                    required
+                    {...field}
+                  />
+                )}
               />
             ) : null}
             {!checkoutDate ? (
@@ -110,7 +132,6 @@ export default function FormDialog({
                 }}
                 label="Salida"
                 type="datetime-local"
-                {...register("checkout", { required: true })}
               />
             ) : null}
           </DialogContent>

@@ -56,13 +56,13 @@ export default function BasicTable({ rows }) {
                     : "No ha salido"}
                 </TableCell>
                 <TableCell>
-                  <IconButton aria-label="settings">
-                    <EditIcon
-                      onClick={() => {
-                        setSelectedAccess(row);
-                        setOpen(true);
-                      }}
-                    />
+                  <IconButton
+                    onClick={() => {
+                      setSelectedAccess(row);
+                      setOpen(true);
+                    }}
+                  >
+                    <EditIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>
