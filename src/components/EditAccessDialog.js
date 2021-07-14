@@ -12,6 +12,7 @@ import Notification from "./Notification";
 
 import { getDateTimeLocalToString } from "../utils";
 import { db } from "../firebase";
+import { useAccessDispatch } from "../providers/AccessProvider";
 
 export default function FormDialog({
   open,
@@ -29,6 +30,8 @@ export default function FormDialog({
     setValue,
   } = useForm();
   const [state, setState] = useState({});
+
+  const dispatch = useAccessDispatch();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -51,9 +54,17 @@ export default function FormDialog({
       })
       .then((docRef) => {
         console.log("Document written", docRef);
-        setResult(`Se ha modificado acceso`);
-        window.location.reload();
 
+        dispatch({
+          type: "UPDATE_ACCESS",
+          payload: {
+            id,
+            access,
+            checkout: checkout !== "" ? checkout : null,
+          },
+        });
+
+        setResult(`Se ha modificado acceso`);
         setLoading(false);
         setSuccess(true);
         handleClose();

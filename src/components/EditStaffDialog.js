@@ -16,9 +16,12 @@ import audioSrc from "../beep.mp3";
 import { db } from "../firebase";
 import MenuItem from "@material-ui/core/MenuItem";
 import { InputLabel } from "@material-ui/core";
+import { useAccessDispatch } from "../providers/AccessProvider";
 
 export default function FormDialog({ open, setOpen, staffData }) {
   const audio = useRef(new Audio(audioSrc));
+
+  const dispatch = useAccessDispatch();
 
   const {
     reset,
@@ -33,7 +36,7 @@ export default function FormDialog({ open, setOpen, staffData }) {
   const [success, setSuccess] = useState(false);
   const [result, setResult] = useState("");
 
-  const [rfidTag, setRfidTag] = useState(null  );
+  const [rfidTag, setRfidTag] = useState(null);
 
   const [state, setState] = useState({
     status: staffData.status,
@@ -53,6 +56,8 @@ export default function FormDialog({ open, setOpen, staffData }) {
     console.log(data);
     const { name, email, birthday, address, status } = data;
 
+    const tagId = rfidTag ? rfidTag : staffData.tagId;
+
     setLoading(true);
     db.collection("staff")
       .doc(staffData.id)
@@ -61,12 +66,16 @@ export default function FormDialog({ open, setOpen, staffData }) {
         email,
         birthday,
         address,
-        status ,
-        tagId: rfidTag ? rfidTag : staffData.tagId,
+        status,
+        tagId,
       })
       .then((docRef) => {
         console.log("Document written", docRef);
-        window.location.reload();
+
+        dispatch({
+          type: "SET_STAFF",
+          payload: { id: staffData.id, tagId, ...data },
+        });
         setResult(`Se ha actualizado usuario`);
 
         setLoading(false);

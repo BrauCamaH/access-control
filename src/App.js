@@ -11,8 +11,17 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import StaffPage from "./pages/StaffPage";
 import { useUserState } from "./providers/UserProvider";
+import { AccessProvider } from "./providers/AccessProvider";
 
 import "./App.css";
+
+function AccessPage(){
+  return (
+    <AccessProvider>
+      <StaffPage />
+    </AccessProvider>
+  );
+}
 
 function App() {
   return (
@@ -22,7 +31,7 @@ function App() {
           <Home />
         </Route>
         <Route path="/login" render={() => <Redirect to="/" />} exact={true} />
-        <Route path="/staff/:id" component={StaffPage} exact={true} />
+        <Route path="/staff/:id" component={AccessPage} exact={true} />
         <Route render={() => <Redirect to="/" />} />
       </Switch>
     </Router>

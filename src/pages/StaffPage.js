@@ -20,6 +20,7 @@ import { green, red } from "@material-ui/core/colors";
 
 import { db } from "../firebase";
 import { getStatusInfo } from "../utils";
+import { useAccessState, useAccessDispatch } from "../providers/AccessProvider";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,8 +55,8 @@ export default function StaffPage() {
 
   const classes = useStyles();
 
-  const [accessData, setAccessData] = useState();
-  const [staffData, setStaffData] = useState([]);
+  const state = useAccessState();
+  const dispatch = useAccessDispatch();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -66,7 +67,10 @@ export default function StaffPage() {
       .doc(params.id)
       .get()
       .then((staff) => {
-        setStaffData({ id: staff.id, ...staff.data() });
+        dispatch({
+          type: "SET_STAFF",
+          payload: { id: staff.id, ...staff.data() },
+        });
 
         const staffRef = db.collection("staff").doc(staff.id);
         staffRef
@@ -79,7 +83,7 @@ export default function StaffPage() {
               return { id: doc.id, ...doc.data() };
             });
 
-            setAccessData(access);
+            dispatch({ type: "SET_ACCESS", payload: access });
 
             console.log(access);
 
@@ -96,7 +100,7 @@ export default function StaffPage() {
         setError(true);
         setLoading(false);
       });
-  }, []);
+  }, [params.id, dispatch]);
 
   if (loading) {
     return <LoadingBackdrop open={loading} />;
@@ -119,23 +123,21 @@ export default function StaffPage() {
             <Typography variant="h6">Regresar</Typography>
           </Button>
           <Chip
-            label={getStatusInfo(staffData.status)}
-            color={staffData.status === "accessed" ? "primary" : "secondary"}
+            label={getStatusInfo(state.staff?.status)}
+            color={state.staff?.status === "accessed" ? "primary" : "secondary"}
           />
         </Toolbar>
       </AppBar>
       <Container className={classes.root}>
         <Grid item xs={12} md={12}>
-          <StaffData staff={staffData} />
+          {state.staff ? <StaffData staff={state.staff} /> : null}
           <Typography variant="h6" className={classes.title}>
             Acceso
           </Typography>
           <div className={classes.demo}>
             <List>
-              {accessData ? (
-                accessData.legth !== 0 ? (
-                  <AccessTable rows={accessData} staffId={staffData?.id} />
-                ) : null
+              {state.access ? (
+                <AccessTable rows={state.access} staffId={state.staff?.id} />
               ) : null}
             </List>
           </div>

@@ -20,6 +20,15 @@ const useStyles = makeStyles({
   },
 });
 
+function getValidDate(row) {
+  const { access, checkout } = row;
+  const accessDate = access?.toDate ? access.toDate() : new Date(access);
+  const checkoutDate = checkout?.toDate
+    ? checkout.toDate()
+    : new Date(checkout);
+  return { accessDate, checkoutDate, ...row };
+}
+
 export default function BasicTable({ rows, staffId }) {
   const classes = useStyles();
   const [open, setOpen] = useState();
@@ -39,26 +48,25 @@ export default function BasicTable({ rows, staffId }) {
         </TableHead>
         <TableBody>
           {rows.map((row) => {
-            const { access, checkout } = row;
-            const accessDate = access?.toDate();
-            const checkoutDate = checkout?.toDate();
+            const { accessDate, checkoutDate } = getValidDate(row);
+
             return (
               <TableRow key={row.id}>
                 <TableCell>{GetReadableDate(accessDate)}</TableCell>
 
-                <TableCell>{formatAMPM(accessDate)}</TableCell>
+                <TableCell>{formatAMPM(checkoutDate)}</TableCell>
                 <TableCell>
                   {checkoutDate ? formatAMPM(checkoutDate) : ""}
                 </TableCell>
                 <TableCell>
-                  {checkout
+                  {checkoutDate
                     ? timeDiffCalc(checkoutDate, accessDate)
                     : "No ha salido"}
                 </TableCell>
                 <TableCell>
                   <IconButton
                     onClick={() => {
-                      setSelectedAccess(row);
+                      setSelectedAccess(getValidDate(row));
                       setOpen(true);
                     }}
                   >
@@ -71,14 +79,11 @@ export default function BasicTable({ rows, staffId }) {
         </TableBody>
         {selectedAccess ? (
           <EditDialog
-            accessDate={selectedAccess.access.toDate()}
+            accessDate={selectedAccess?.accessDate}
             checkoutDate={
-              selectedAccess.checkout
-                ? selectedAccess.checkout.toDate()
-                : undefined
+              selectedAccess.checkoutDate ? selectedAccess.checkoutDate : undefined
             }
             id={selectedAccess.id}
-            sta
             open={open}
             setOpen={setOpen}
             staffId={staffId}

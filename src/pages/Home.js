@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, Chip } from "@material-ui/core";
 
 import { useUserState } from "../providers/UserProvider";
+import { StaffProvider } from "../providers/StaffProvider";
 
 import CreateUserDialog from "../CreateUserDialog";
 import Access from "./Access";
@@ -37,7 +38,6 @@ export default function Home() {
     message: "Error en lector",
   });
 
-  
   useEffect(() => {
     window.api.requestRfidStatus();
     window.api.requestTagId();
@@ -97,8 +97,14 @@ export default function Home() {
           </div>
         </Toolbar>
       </AppBar>
-      {user ? <Admin /> : <Access />}
-      {user ? <CreateUserDialog open={open} setOpen={setOpen} /> : null}
+      {user ? (
+        <StaffProvider>
+          <Admin />
+          <CreateUserDialog open={open} setOpen={setOpen} />
+        </StaffProvider>
+      ) : (
+        <Access />
+      )}
     </div>
   );
 }
