@@ -1,3 +1,9 @@
+import { Capacitor } from "@capacitor/core";
+
+export function isAndroid() {
+  return Capacitor.getPlatform() === "android";
+}
+
 export function getStatusInfo(status) {
   return status === "accessed"
     ? "Accedio"

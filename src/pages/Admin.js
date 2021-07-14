@@ -19,6 +19,7 @@ import { useStaffState, useStaffDispatch } from "../providers/StaffProvider";
 
 import { db } from "../firebase";
 
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,

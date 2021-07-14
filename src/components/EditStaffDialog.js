@@ -17,6 +17,7 @@ import { db } from "../firebase";
 import MenuItem from "@material-ui/core/MenuItem";
 import { InputLabel } from "@material-ui/core";
 import { useAccessDispatch } from "../providers/AccessProvider";
+import { isAndroid } from "../utils";
 
 export default function FormDialog({ open, setOpen, staffData }) {
   const audio = useRef(new Audio(audioSrc));
@@ -93,11 +94,12 @@ export default function FormDialog({ open, setOpen, staffData }) {
     setOpen(false);
     setRfidTag("");
     clearErrors();
-    window.api.removeEventListeners("getTagId");
+    if (!isAndroid()) window.api.removeEventListeners("getTagId");
   };
 
   function handleEnter() {
     reset();
+    if (isAndroid()) return;
 
     window.api.getTagId((data) => {
       setRfidTag(data);
@@ -106,6 +108,7 @@ export default function FormDialog({ open, setOpen, staffData }) {
   }
 
   useEffect(() => {
+    if (isAndroid()) return;
     return () => {
       window.api.removeEventListeners("getTagId");
     };

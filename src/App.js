@@ -14,8 +14,9 @@ import { useUserState } from "./providers/UserProvider";
 import { AccessProvider } from "./providers/AccessProvider";
 
 import "./App.css";
+import { isAndroid } from "./utils";
 
-function AccessPage(){
+function AccessPage() {
   return (
     <AccessProvider>
       <StaffPage />
@@ -32,6 +33,19 @@ function App() {
         </Route>
         <Route path="/login" render={() => <Redirect to="/" />} exact={true} />
         <Route path="/staff/:id" component={AccessPage} exact={true} />
+        <Route render={() => <Redirect to="/" />} />
+      </Switch>
+    </Router>
+  );
+}
+
+function AndroidApp() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/" exact>
+          <Login />
+        </Route>
         <Route render={() => <Redirect to="/" />} />
       </Switch>
     </Router>
@@ -62,6 +76,6 @@ export default function AuthOrDefault() {
   if (user) {
     return <App />;
   } else {
-    return <UnAuthApp />;
+    return isAndroid() ? <AndroidApp /> : <UnAuthApp />;
   }
 }

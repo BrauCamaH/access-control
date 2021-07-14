@@ -1,0 +1,6 @@
+{
+	"appId": "com.villanapoli.access",
+	"appName": "Control de Acceso",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
