@@ -100,7 +100,6 @@ export default function Home() {
       <AppBar position="static">
         <Toolbar className={classes.appBar}>
           <Avatar className={classes.avatar} src="logo-vn.png" />
-          <Typography variant="h6">Control de Acceso</Typography>
           <div>
             {!isAndroid() ? (
               <Chip
