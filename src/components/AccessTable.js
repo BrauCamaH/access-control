@@ -12,7 +12,7 @@ import IconButton from "@material-ui/core/IconButton";
 import EditIcon from "@material-ui/icons/Edit";
 
 import EditDialog from "./EditAccessDialog";
-import { formatAMPM, timeDiffCalc, GetReadableDate } from "../utils";
+import { formatAMPM, timeDiffCalc, getReadableDate } from "../utils";
 
 const useStyles = makeStyles({
   table: {
@@ -52,8 +52,7 @@ export default function BasicTable({ rows, staffId }) {
 
             return (
               <TableRow key={row.id}>
-                <TableCell>{GetReadableDate(accessDate)}</TableCell>
-
+                <TableCell>{getReadableDate(accessDate)}</TableCell>
                 <TableCell>{formatAMPM(checkoutDate)}</TableCell>
                 <TableCell>
                   {checkoutDate ? formatAMPM(checkoutDate) : ""}
@@ -81,7 +80,9 @@ export default function BasicTable({ rows, staffId }) {
           <EditDialog
             accessDate={selectedAccess?.accessDate}
             checkoutDate={
-              selectedAccess.checkoutDate ? selectedAccess.checkoutDate : undefined
+              selectedAccess.checkoutDate
+                ? selectedAccess.checkoutDate
+                : undefined
             }
             id={selectedAccess.id}
             open={open}

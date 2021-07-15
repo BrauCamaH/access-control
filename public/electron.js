@@ -4,6 +4,14 @@ const path = require("path");
 
 const SerialPort = require("serialport");
 const Readline = require("@serialport/parser-readline");
+const admin = require("firebase-admin");
+
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+});
+
+const fcm = admin.messaging();
+const db = admin.firestore();
 
 let mainWindow;
 
@@ -122,5 +130,30 @@ ipcMain.on("requestTag", async (event, args) => {
     })
     .catch((err) => {
       console.log(err.message);
+    });
+});
+
+ipcMain.on("sendAccessNotification", (event, args) => {
+  const { title, body } = args;
+  db.collection("tokens")
+    .get()
+    .then((snapshot) => {
+      const tokens = snapshot.docs.map((snap) => snap.id);
+
+      const payload = {
+        notification: { title, body },
+      };
+
+      fcm
+        .sendToDevice(tokens, payload)
+        .then(() => {
+          console.log("Notification sent");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    })
+    .catch((error) => {
+      console.log(error);
     });
 });

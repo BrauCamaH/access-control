@@ -47,7 +47,7 @@ export function timeDiffCalc(date1, date2) {
   return strTime;
 }
 
-export function GetReadableDate(date) {
+export function getReadableDate(date) {
   var meses = [
     "Enero",
     "Febrero",
@@ -69,6 +69,10 @@ export function GetReadableDate(date) {
     " de " +
     date.getFullYear()
   );
+}
+
+export function getDateTimeString(date) {
+  return getReadableDate(date) + " " + formatAMPM(date);
 }
 
 export function getDateTimeLocalToString(date) {

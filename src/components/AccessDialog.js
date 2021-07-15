@@ -12,6 +12,7 @@ import Notification from "./Notification";
 import audioSrc from "../beep.mp3";
 
 import { db } from "../firebase";
+import { getDateTimeString } from "../utils";
 
 function formatAMPM(date) {
   let hours = date.getHours();
@@ -68,6 +69,11 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
             );
             setLoading(false);
             setSuccess(true);
+
+            window.api.sendNotification({
+              title: `${staffData.name} ha accedido`,
+              body: getDateTimeString(savedDate),
+            });
           })
           .catch((error) => {
             setLoading(false);
@@ -111,6 +117,11 @@ export default function FormDialog({ open, setOpen, isCheckout }) {
             );
             setLoading(false);
             setSuccess(true);
+
+            window.api.sendNotification({
+              title: `${staffData.name} ha salido`,
+              body: getDateTimeString(savedDate),
+            });
           })
           .catch((error) => {
             setLoading(false);

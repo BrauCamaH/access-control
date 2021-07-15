@@ -47,7 +47,6 @@ function getStatusInfo(status) {
 export default function Admin() {
   const classes = useStyles();
 
-
   const staff = useStaffState();
   const staffDispatch = useStaffDispatch();
 
