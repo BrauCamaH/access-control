@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { NavLink } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, Chip } from "@material-ui/core";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Chip,
+  Avatar,
+} from "@material-ui/core";
 
 import { PushNotifications } from "@capacitor/push-notifications";
 
@@ -27,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
       textDecoration: "none",
       padding: "10px 20px",
     },
+  },
+  avatar: {
+    padding: "3px",
+    height: "50px",
+    width: "50px",
   },
 }));
 
@@ -87,12 +99,15 @@ export default function Home() {
     <div>
       <AppBar position="static">
         <Toolbar className={classes.appBar}>
+          <Avatar className={classes.avatar} src="logo-vn.png" />
           <Typography variant="h6">Control de Acceso</Typography>
           <div>
-            <Chip
-              label={rfidStatus?.message}
-              color={rfidStatus?.success ? "primary" : "secondary"}
-            />
+            {!isAndroid() ? (
+              <Chip
+                label={rfidStatus?.message}
+                color={rfidStatus?.success ? "primary" : "secondary"}
+              />
+            ) : null}
             {user ? (
               <>
                 {isAndroid() ? (

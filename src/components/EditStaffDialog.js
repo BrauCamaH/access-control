@@ -148,13 +148,15 @@ export default function FormDialog({ open, setOpen, staffData }) {
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <DialogTitle id="form-dialog-title">Editar Empleado</DialogTitle>
           <DialogContent>
-            <TextField
-              value={rfidTag}
-              fullWidth
-              label="Identificador"
-              disabled
-              required
-            />
+            {!isAndroid() ? (
+              <TextField
+                value={rfidTag}
+                fullWidth
+                label="Identificador"
+                disabled
+                required
+              />
+            ) : null}
             <div style={{ paddingBottom: "10px", paddingTop: "10px" }}>
               <Controller
                 name="status"
