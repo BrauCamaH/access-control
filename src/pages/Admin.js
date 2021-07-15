@@ -15,8 +15,10 @@ import FolderIcon from "@material-ui/icons/Person";
 import DeleteIcon from "@material-ui/icons/NavigateNext";
 
 import LoadingBackdrop from "../components/LoadingBackdrop";
+import { useStaffState, useStaffDispatch } from "../providers/StaffProvider";
 
 import { db } from "../firebase";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,30 +44,30 @@ function getStatusInfo(status) {
     : "No ha accedido";
 }
 
-export default function InteractiveList() {
+export default function Admin() {
   const classes = useStyles();
 
-  const [staff, setStaff] = useState([]);
+  const staff = useStaffState();
+  const staffDispatch = useStaffDispatch();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    const staffRef = db.collection("users");
+    const staffRef = db.collection("staff");
     staffRef
-      .limit(10)
+      .limit(20)
       .get()
       .then((snap) => {
         setLoading(false);
-
         const staff = snap.docs.map((doc) => {
           return { id: doc.id, ...doc.data() };
         });
 
         console.log("staff", staff);
 
-        setStaff(staff);
+        staffDispatch({type: "SET_STAFF", payload: staff});
       })
       .catch((error) => {
         setLoading(false);
@@ -73,6 +75,10 @@ export default function InteractiveList() {
         setError(true);
       });
   }, []);
+
+  if (error) {
+    return <p>Revise conexion a internet</p>;
+  }
 
   return (
     <Container className={classes.root}>
@@ -86,8 +92,12 @@ export default function InteractiveList() {
           <List>
             {staff
               ? staff?.map((s) => (
-                  <NavLink className={classes.link} to={`/staff/${s.id}`}>
-                    <ListItem key={s.id} button>
+                  <NavLink
+                    key={s.id}
+                    className={classes.link}
+                    to={`/staff/${s.id}`}
+                  >
+                    <ListItem button>
                       <ListItemAvatar>
                         <Avatar>
                           <FolderIcon />

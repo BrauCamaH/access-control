@@ -2,35 +2,35 @@ import React, { useState, useEffect } from "react";
 import { useHistory, useParams } from "react-router";
 import { makeStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import Container from "@material-ui/core/Container";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
-import Avatar from "@material-ui/core/Avatar";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
+import Chip from "@material-ui/core/Chip";
 
-import AccessIcon from "@material-ui/icons/AccessTime";
 import NavigateBackIcon from "@material-ui/icons/NavigateBefore";
-import MeetingRoom from "@material-ui/icons/MeetingRoom";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 
 import LoadingBackdrop from "../components/LoadingBackdrop";
 import StaffData from "../components/StaffData";
+import AccessTable from "../components/AccessTable";
 
 import { green, red } from "@material-ui/core/colors";
 
 import { db } from "../firebase";
-
-import { formatAMPM, isCheckout } from "../utils";
+import { getStatusInfo } from "../utils";
+import { useAccessState, useAccessDispatch } from "../providers/AccessProvider";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+  },
+  appBar: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     margin: theme.spacing(4, 0, 2),
@@ -55,45 +55,59 @@ export default function StaffPage() {
 
   const classes = useStyles();
 
-  const [accessData, setAccessData] = useState([]);
-  const [staffData, setStaffData] = useState([]);
+  const state = useAccessState();
+  const dispatch = useAccessDispatch();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    db.collection("users")
+    db.collection("staff")
       .doc(params.id)
       .get()
-      .then((doc) => {
-        setStaffData({ ...doc.data() });
+      .then((staff) => {
+        dispatch({
+          type: "SET_STAFF",
+          payload: { id: staff.id, ...staff.data() },
+        });
+
+        const staffRef = db.collection("staff").doc(staff.id);
+        staffRef
+          .collection("access")
+          .limit(10)
+          .orderBy("access", "desc")
+          .get()
+          .then((snap) => {
+            const access = snap.docs.map((doc) => {
+              return { id: doc.id, ...doc.data() };
+            });
+
+            dispatch({ type: "SET_ACCESS", payload: access });
+
+            console.log(access);
+
+            setLoading(false);
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.log(error);
+            setError(true);
+          });
       })
       .catch((error) => {
         console.log(error);
-        setLoading(false);
-      });
-
-    const staffRef = db.collection("access");
-    staffRef
-      .limit(10)
-      .where("userId", "==", params.id)
-      .get()
-      .then((snap) => {
-        setLoading(false);
-
-        const staff = snap.docs.map((doc) => {
-          return { id: doc.id, ...doc.data() };
-        });
-
-        setAccessData(staff);
-      })
-      .catch((error) => {
-        setLoading(false);
-
         setError(true);
+        setLoading(false);
       });
-  }, []);
+  }, [params.id, dispatch]);
+
+  if (loading) {
+    return <LoadingBackdrop open={loading} />;
+  }
+  if (error) {
+    return <p>Revise conexion</p>;
+  }
 
   return (
     <>
@@ -102,49 +116,29 @@ export default function StaffPage() {
           <Button
             size="small"
             onClick={() => {
-              history.goBack();
+              history.push("/");
             }}
           >
             <NavigateBackIcon />
             <Typography variant="h6">Regresar</Typography>
           </Button>
+          <Chip
+            label={getStatusInfo(state.staff?.status)}
+            color={state.staff?.status === "accessed" ? "primary" : "secondary"}
+          />
         </Toolbar>
       </AppBar>
       <Container className={classes.root}>
-        <LoadingBackdrop open={loading} />
-
         <Grid item xs={12} md={12}>
-          <StaffData staff={staffData} />
+          {state.staff ? <StaffData staff={state.staff} /> : null}
           <Typography variant="h6" className={classes.title}>
             Acceso
           </Typography>
           <div className={classes.demo}>
             <List>
-              {accessData
-                ? accessData?.map((access) => (
-                    <ListItem key={access.id} button>
-                      <ListItemAvatar>
-                        <Avatar>
-                          <AccessIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={`${access.date
-                          .toDate()
-                          .toLocaleDateString()} a las ${formatAMPM(
-                          access.date.toDate()
-                        )}`}
-                      />
-                      <ListItemSecondaryAction>
-                        {isCheckout(access.type) ? (
-                          <ExitToAppIcon className={classes.danger} />
-                        ) : (
-                          <MeetingRoom className={classes.success} />
-                        )}
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))
-                : null}
+              {state.access ? (
+                <AccessTable rows={state.access} staffId={state.staff?.id} />
+              ) : null}
             </List>
           </div>
         </Grid>

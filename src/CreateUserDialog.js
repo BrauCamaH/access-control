@@ -11,12 +11,15 @@ import { useForm } from "react-hook-form";
 import LoadingBackdrop from "./components/LoadingBackdrop";
 import Notification from "./components/Notification";
 
+import { useStaffDispatch } from "./providers/StaffProvider";
+
 import audioSrc from "./beep.mp3";
 
 import { db } from "./firebase";
 
 export default function FormDialog({ open, setOpen }) {
   const audio = useRef(new Audio(audioSrc));
+  const staffDispatch = useStaffDispatch();
 
   const {
     register,
@@ -42,17 +45,25 @@ export default function FormDialog({ open, setOpen }) {
     }
 
     setLoading(true);
-    db.collection("users")
-      .doc(rfidTag)
-      .set({
+    db.collection("staff")
+      .add({
         name: `${name} ${firstLastName} ${secondLastName}`,
         email,
         birthday,
         address,
         status: "registered",
+        tagId: rfidTag,
+        currentAccessId: null,
       })
       .then((docRef) => {
-        console.log("Document written");
+        console.log(docRef);
+        const staffDoc = {
+          id: docRef.id,
+          name: `${name} ${firstLastName} ${secondLastName}`,
+          ...data,
+        };
+
+        staffDispatch({ type: "ADD_STAFF", payload: staffDoc });
         setResult(`Usuario creado con id ${rfidTag}`);
 
         setLoading(false);
@@ -137,8 +148,8 @@ export default function FormDialog({ open, setOpen }) {
             <TextField
               fullWidth
               label="Segundo Apellido"
-              error={errors.seconLastName}
-              {...register("seconLastName")}
+              error={errors.secondLastName}
+              {...register("secondLastName")}
             />
             <TextField
               fullWidth
@@ -148,7 +159,6 @@ export default function FormDialog({ open, setOpen }) {
               {...register("email")}
               required
             />
-
             <TextField
               fullWidth
               label="Domicilio"

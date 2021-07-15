@@ -14,6 +14,7 @@ import LoadingBackdrop from "../components/LoadingBackdrop";
 
 import { auth } from "../firebase";
 import { getErrorMesssage } from "../utils/errorMessage";
+import { isAndroid } from "../utils";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -126,17 +127,19 @@ export default function Login() {
           >
             Ingresar
           </Button>
-          <NavLink className={classes.link} to="/">
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="secondary"
-              className={classes.submit}
-            >
-              Regresar a registro
-            </Button>
-          </NavLink>
+          {!isAndroid() ? (
+            <NavLink className={classes.link} to="/">
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="secondary"
+                className={classes.submit}
+              >
+                Regresar a registro
+              </Button>
+            </NavLink>
+          ) : null}
         </form>
       </div>
     </Container>
