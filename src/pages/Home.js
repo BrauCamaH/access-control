@@ -93,6 +93,7 @@ export default function Home() {
   useEffect(() => {
     if (isAndroid()) return;
     window.api.requestRfidStatus();
+
     window.api.requestTagId();
 
     window.api.getRfidStatus((data) => {

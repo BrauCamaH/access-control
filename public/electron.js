@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron"); // electron
+const { app, BrowserWindow, ipcMain, Menu } = require("electron"); // electron
 const isDev = require("electron-is-dev"); // To check if electron is in development mode
 const path = require("path");
 
@@ -35,7 +35,23 @@ const createWindow = () => {
     },
   });
 
-  !isDev && mainWindow.setMenu(null);
+  !isDev &&
+    mainWindow.setMenu(
+      Menu.buildFromTemplate([
+        {
+          role: "appMenu",
+          label: "opciones",
+          submenu: [
+            {
+              label: "Revisar Lector",
+              click() {
+                mainWindow.reload();
+              },
+            },
+          ],
+        },
+      ])
+    );
   // Loading a webpage inside the electron window we just created
   mainWindow.loadURL(
     isDev
@@ -86,50 +102,67 @@ ipcMain.on("quit-app", (args) => {
   app.quit();
 });
 
-let rfidStatus;
-let currentPort;
-
-ipcMain.on("requestTag", async (event, args) => {
+ipcMain.on("requestRfidStatus", async (event, args) => {
   SerialPort.list()
     .then((ports) => {
       if (ports.length === 0) {
         console.log("No ports discovered");
       } else {
         console.log("ports", ports);
+        let rfidStatus;
 
-        if (currentPort === ports[0].path) return;
+        let { path, pnpId } = ports[0];
+
+        console.log(pnpId);
+
+        if (pnpId === undefined) {
+          event.sender.send("getRfidStatus", {
+            message: "Error en Lector",
+            success: false,
+          });
+
+          return;
+        }
 
         const port = new SerialPort(
-          ports[0].path,
+          path,
           {
             baudRate: 9600,
           },
           function (err) {
             if (err) {
-              rfidStatus = {
+              if (pnpId) {
+                event.sender.send("getRfidStatus", {
+                  message: "Lector Detectado",
+                  success: true,
+                });
+                return;
+              }
+
+              event.sender.send("getRfidStatus", {
                 message: "Error en Lector",
                 success: false,
-              };
+              });
 
+              console.log(err);
               return console.log("Error: ", err.message);
             }
-            currentPort = ports[0].path;
-            rfidStatus = {
+
+            event.sender.send("getRfidStatus", {
               message: "Lector Detectado",
               success: true,
-            };
+            });
           }
         );
+
         const parser = port.pipe(new Readline({ delimiter: "\n" }));
 
-        ipcMain.on("requestRfidStatus", async (event, args) => {
+        ipcMain.on("requestTag", async (event, args) => {
           console.log("Rfid Status requested", rfidStatus);
-          event.sender.send("getRfidStatus", rfidStatus);
-        });
-
-        parser.on("data", (data) => {
-          console.log(data);
-          event.sender.send("getTagId", data);
+          parser.on("data", (data) => {
+            console.log(data);
+            event.sender.send("getTagId", data);
+          });
         });
       }
     })
