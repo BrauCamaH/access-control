@@ -6,6 +6,11 @@ const SerialPort = require("serialport");
 const Readline = require("@serialport/parser-readline");
 const admin = require("firebase-admin");
 
+isDev
+  ? require("dotenv").config()
+  : (process.env.GOOGLE_APPLICATION_CREDENTIALS =
+      "/home/pi/Documents/Access/firebase-key.json");
+
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
 });

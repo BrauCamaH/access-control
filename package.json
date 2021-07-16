@@ -17,6 +17,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "dotenv": "^10.0.0",
     "electron-is-dev": "^2.0.0",
     "firebase": "^8.6.8",
     "firebase-admin": "^9.10.0",
@@ -37,7 +38,8 @@
     "build:capacitor": "yarn build && rm build/electron.js && rm build/preload.js && yarn cap sync",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dist:raspian": "yarn build && rm -rf dist && USE_SYSTEM_FPM=true electron-builder build --linux deb --armv7l"
+    "env": "cp .env build/",
+    "dist:raspian": "yarn build && yarn env && rm -rf dist && USE_SYSTEM_FPM=true electron-builder build --linux deb --armv7l"
   },
   "eslintConfig": {
     "extends": [
@@ -66,7 +68,7 @@
   },
   "build": {
     "appId": "com.villanapoli.access-contro",
-    "productName": "Vn Access Control",
+    "productName": "Control de Acceso VN",
     "files": [
       "build/**/*"
     ],
