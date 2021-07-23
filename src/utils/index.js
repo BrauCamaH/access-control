@@ -16,6 +16,18 @@ export function isCheckout(status) {
   return status === "checkout";
 }
 
+
+// get date in AM/PM format
+export function getDate(date) {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const hours12 = hours % 12;
+  const minutesString = minutes < 10 ? "0" + minutes : minutes;
+  return hours12 + ":" + minutesString + " " + ampm;
+}
+
+
 export function formatAMPM(date) {
   let hours = date.getHours();
   let minutes = date.getMinutes() || "";

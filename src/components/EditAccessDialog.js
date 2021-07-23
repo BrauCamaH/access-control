@@ -10,7 +10,7 @@ import { useForm, Controller } from "react-hook-form";
 import LoadingBackdrop from "./LoadingBackdrop";
 import Notification from "./Notification";
 
-import { getDateTimeLocalToString } from "../utils";
+import { getDateTimeLocalToString, isAndroid } from "../utils";
 import { db } from "../firebase";
 import { useAccessDispatch } from "../providers/AccessProvider";
 
@@ -39,8 +39,6 @@ export default function FormDialog({
   const [result, setResult] = useState("");
 
   const onSubmit = (data) => {
-    console.log(data);
-
     const { access, checkout } = data;
 
     setLoading(true);
@@ -52,8 +50,11 @@ export default function FormDialog({
         access: new Date(access),
         checkout: checkout !== "" ? new Date(checkout) : null,
       })
-      .then((docRef) => {
-        console.log("Document written", docRef);
+      .then(() => {
+        setResult(`Se ha modificado acceso`);
+        setLoading(false);
+        setSuccess(true);
+        handleClose();
 
         dispatch({
           type: "UPDATE_ACCESS",
@@ -63,15 +64,9 @@ export default function FormDialog({
             checkout: checkout !== "" ? checkout : null,
           },
         });
-
-        setResult(`Se ha modificado acceso`);
-        setLoading(false);
-        setSuccess(true);
-        handleClose();
       })
       .catch((error) => {
-        console.error("Error adding document: ", error);
-        setResult(`Error al intentar modificar acceso`);
+        setResult(`Error al intentar modificar acceso`, error.message);
 
         setLoading(false);
         setError(true);
@@ -87,7 +82,9 @@ export default function FormDialog({
   const handleClose = () => {
     setOpen(false);
     clearErrors();
-    window.api.removeEventListeners("getTagId");
+    if (!isAndroid()) {
+      window.api.removeEventListeners("getTagId");
+    }
   };
 
   useEffect(() => {

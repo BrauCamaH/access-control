@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+  	match /staff/{staffDoc}{
+    	allow write, read;
+	}
+    
+    match /tokens/{token}{
+    	allow write, read;
+	}
+    
+    match /staff/{staffDoc}/access/{accessDoc}{
+    	allow write, read;
+
+	}
+  }
+}

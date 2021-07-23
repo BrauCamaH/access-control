@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import("firebase/firestore");
 
-const firebaseConfig = {
+let firebaseConfig = {
   apiKey: "AIzaSyCxpl2TWlFFszc1dy0GrQSa2B9Y7YqdO-E",
   authDomain: "access-control-9c6f2.firebaseapp.com",
   databaseURL: "https://access-control-9c6f2-default-rtdb.firebaseio.com",
@@ -13,5 +13,8 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-export const db = firebase.firestore();
-export const auth = firebase.auth();
+const db = firebase.firestore();
+
+const auth = firebase.auth();
+
+export { db, auth };
