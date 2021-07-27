@@ -23,13 +23,14 @@ const useStyles = makeStyles({
 function getValidDate(row) {
   const { access, checkout } = row;
   const accessDate = access?.toDate ? access.toDate() : new Date(access);
+
   const checkoutDate = checkout?.toDate
     ? checkout.toDate()
     : new Date(checkout);
-  return { accessDate, checkoutDate, ...row };
+  return { accessDate, checkoutDate: checkout ? checkoutDate : null, ...row };
 }
 
-export default function BasicTable({ rows, staffId }) {
+export default function BasicTable({ rows, staffId, fetchMoreData }) {
   const classes = useStyles();
   const [open, setOpen] = useState();
   const [selectedAccess, setSelectedAccess] = useState();
@@ -46,6 +47,7 @@ export default function BasicTable({ rows, staffId }) {
             <TableCell>Acciones</TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {rows.map((row) => {
             const { accessDate, checkoutDate } = getValidDate(row);
@@ -53,7 +55,7 @@ export default function BasicTable({ rows, staffId }) {
             return (
               <TableRow key={row.id}>
                 <TableCell>{getReadableDate(accessDate)}</TableCell>
-                <TableCell>{formatAMPM(checkoutDate)}</TableCell>
+                <TableCell>{formatAMPM(accessDate)}</TableCell>
                 <TableCell>
                   {checkoutDate ? formatAMPM(checkoutDate) : ""}
                 </TableCell>
@@ -76,6 +78,7 @@ export default function BasicTable({ rows, staffId }) {
             );
           })}
         </TableBody>
+
         {selectedAccess ? (
           <EditDialog
             accessDate={selectedAccess?.accessDate}

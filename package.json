@@ -24,6 +24,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hook-form": "^7.9.0",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "serialport": "^9.2.0",
@@ -33,12 +34,14 @@
     "start-react": "react-scripts start",
     "start-electron": "nodemon --watch ./public/* --exec \"electron .\"",
     "dev": "concurrently \"yarn start-react\" \"wait-on http://localhost:3000 && yarn start-electron\"",
+    "start-firebase": "set REACT_APP_FIREBASE_STATUS=test firebase emulators:start --import seed",
     "postinstall": "electron-builder install-app-deps",
     "build": "react-scripts build",
     "build:capacitor": "yarn build && rm build/electron.js && rm build/preload.js && yarn cap sync",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "env": "cp .env build/",
+    "dist": " yarn build && yarn env && rm -rf dist && electron-builder build",
     "dist:raspian": "yarn build && yarn env && rm -rf dist && USE_SYSTEM_FPM=true electron-builder build --linux deb --armv7l"
   },
   "eslintConfig": {

@@ -85,8 +85,6 @@ export default function StaffPage() {
 
             dispatch({ type: "SET_ACCESS", payload: access });
 
-            console.log(access);
-
             setLoading(false);
           })
           .catch((error) => {
@@ -101,6 +99,27 @@ export default function StaffPage() {
         setLoading(false);
       });
   }, [params.id, dispatch]);
+
+  function fetchMoreAccess() {
+    const staffRef = db.collection("staff").doc(state.staff.id);
+    staffRef
+      .collection("access")
+      .startAfter(state.access.length - 1)
+      .limit(10)
+      .orderBy("access", "desc")
+      .get()
+      .then((snap) => {
+        const access = snap.docs.map((doc) => {
+          return { id: doc.id, ...doc.data() };
+        });
+
+        let updatedList = state.access.concat(access);
+        dispatch({ type: "SET_ACCESS", payload: updatedList });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   if (loading) {
     return <LoadingBackdrop open={loading} />;
@@ -137,7 +156,11 @@ export default function StaffPage() {
           <div className={classes.demo}>
             <List>
               {state.access ? (
-                <AccessTable rows={state.access} staffId={state.staff?.id} />
+                <AccessTable
+                  rows={state.access}
+                  staffId={state.staff?.id}
+                  fetchMoreData={fetchMoreAccess}
+                />
               ) : null}
             </List>
           </div>
