@@ -44,10 +44,12 @@ export default function FormDialog({ open, setOpen }) {
       return;
     }
 
+    const fullName = `${name} ${firstLastName} ${secondLastName || ""}`;
+
     setLoading(true);
     db.collection("staff")
       .add({
-        name: `${name} ${firstLastName} ${secondLastName}`,
+        name: fullName,
         email,
         birthday,
         address,
@@ -56,10 +58,9 @@ export default function FormDialog({ open, setOpen }) {
         currentAccessId: null,
       })
       .then((docRef) => {
-        console.log(docRef);
         const staffDoc = {
           id: docRef.id,
-          name: `${name} ${firstLastName} ${secondLastName}`,
+          name: fullName,
           ...data,
         };
 

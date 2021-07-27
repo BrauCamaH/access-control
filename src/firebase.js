@@ -17,4 +17,12 @@ const db = firebase.firestore();
 
 const auth = firebase.auth();
 
+if (
+  (process.env.REACT_APP_FIREBASE_STATUS = "test") &&
+  process.env.NODE_ENV === "production"
+) {
+  auth.useEmulator("http://localhost:9099");
+  db.useEmulator("localhost", 8080);
+}
+
 export { db, auth };

@@ -85,8 +85,6 @@ export default function StaffPage() {
 
             dispatch({ type: "SET_ACCESS", payload: access });
 
-            console.log(access);
-
             setLoading(false);
           })
           .catch((error) => {
