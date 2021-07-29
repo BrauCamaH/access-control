@@ -111,7 +111,7 @@ export default function Home() {
     <div>
       <AppBar position="static">
         <Toolbar className={classes.appBar}>
-          <Avatar className={classes.avatar} src="logo-vn.png" />
+          <Avatar className={classes.avatar} src="icon.png" />
           <div>
             {!isAndroid() ? (
               <Chip

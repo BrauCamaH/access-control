@@ -60,7 +60,7 @@ const createWindow = () => {
   );
 
   // Setting Window Icon - Asset file needs to be in the public/images folder.
-  mainWindow.setIcon(path.join(__dirname, "logo-vn.png"));
+  mainWindow.setIcon(path.join(__dirname, "icon.png"));
 };
 
 // ((OPTIONAL)) Setting the location for the userdata folder created by an Electron app. It default to the AppData folder if you don't set it.
