@@ -1,5 +1,5 @@
 {
-  "name": "vn-access-control",
+  "name": "vn-control-de-acceso",
   "version": "0.1.0",
   "private": true,
   "main": "public/electron.js",
@@ -77,6 +77,9 @@
     ],
     "directories": {
       "buildResources": "build"
+    },
+    "linux": {
+      "icon": "./build/icon.png"
     }
   }
 }
